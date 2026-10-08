@@ -179,9 +179,43 @@ addEventListener('keydown', (e) => {
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=19').then((m) => {
+  import('./coffee.js?v=22').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }
 if (document.readyState === 'complete') setTimeout(loadCoffee, 0);
 else addEventListener('load', () => (window.requestIdleCallback ? requestIdleCallback(loadCoffee, { timeout: 1500 }) : setTimeout(loadCoffee, 300)));
+
+// Postage-stamp edge: a paper shape with half-circle notches, redrawn whenever the frame resizes.
+function stampPath(w, h, r, gap) {
+  const nx = Math.max(3, Math.round(w / gap)), ny = Math.max(3, Math.round(h / gap));
+  const sx = w / nx, sy = h / ny;
+  let d = 'M0 0';
+  for (let i = 0; i < nx; i++) { const c = (i + 0.5) * sx; d += ` L${c - r} 0 A${r} ${r} 0 0 0 ${c + r} 0`; }
+  d += ` L${w} 0`;
+  for (let j = 0; j < ny; j++) { const c = (j + 0.5) * sy; d += ` L${w} ${c - r} A${r} ${r} 0 0 0 ${w} ${c + r}`; }
+  d += ` L${w} ${h}`;
+  for (let i = nx - 1; i >= 0; i--) { const c = (i + 0.5) * sx; d += ` L${c + r} ${h} A${r} ${r} 0 0 0 ${c - r} ${h}`; }
+  d += ` L0 ${h}`;
+  for (let j = ny - 1; j >= 0; j--) { const c = (j + 0.5) * sy; d += ` L0 ${c + r} A${r} ${r} 0 0 0 0 ${c - r}`; }
+  return d + ' Z';
+}
+(function () {
+  const el = $('stamp');
+  if (!el) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('class', 'stamp-edge');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS(ns, 'path');
+  svg.append(path);
+  el.prepend(svg);
+  const draw = () => {
+    const w = el.clientWidth, h = el.clientHeight;
+    if (!w || !h) return;
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    path.setAttribute('d', stampPath(w, h, 5.5, 18));
+  };
+  new ResizeObserver(draw).observe(el);
+  draw();
+})();

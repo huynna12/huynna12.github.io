@@ -1,11 +1,11 @@
-// A little 3D scene for the hero: a girl sipping coffee on a red plastic stool, next to a low table
-// with a phin dripping into a glass. Loaded after the page is ready.
+// A 3D scene for the hero: a girl with a flag shirt sips iced coffee on a red plastic stool,
+// next to a second stool with a phin dripping into a glass. Loaded after the page is ready.
 import * as THREE from './vendor/three.module.min.js';
 
 const { MathUtils: M } = THREE;
 const UP = new THREE.Vector3(0, 1, 0);
 
-/* ---------- Glass (shared shapes) ---------- */
+/* ---------- Glass ---------- */
 const GLASS_H = 9;
 const RO = (y) => 2.4 + 0.8 * (y / GLASS_H);
 const RI = (y) => RO(y) - 0.14;
@@ -26,16 +26,21 @@ function sharedParts() {
   const milkGeo = new THREE.CylinderGeometry(innerR(MILK_TOP), innerR(0.55), MILK_TOP - 0.55, 40, 1, false);
   milkGeo.translate(0, (MILK_TOP + 0.55) / 2, 0);
 
+  // Layered coffee (phin glass): caramel at the milk line, dark above.
   const cBot = MILK_TOP - 0.1;
-  const coffeeGeo = new THREE.CylinderGeometry(innerR(COFFEE_TOP), innerR(cBot), COFFEE_TOP - cBot, 40, 6, false);
-  coffeeGeo.translate(0, (COFFEE_TOP + cBot) / 2, 0);
-  const pos = coffeeGeo.attributes.position, cols = [];
+  const layeredGeo = new THREE.CylinderGeometry(innerR(COFFEE_TOP), innerR(cBot), COFFEE_TOP - cBot, 40, 6, false);
+  layeredGeo.translate(0, (COFFEE_TOP + cBot) / 2, 0);
+  const pos = layeredGeo.attributes.position, cols = [];
   const c0 = new THREE.Color(0xb98a5a), c1 = new THREE.Color(0x3b2417), t = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     t.copy(c0).lerp(c1, M.clamp((pos.getY(i) - cBot) / 1.8, 0, 1));
     cols.push(t.r, t.g, t.b);
   }
-  coffeeGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+  layeredGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+
+  // Stirred coffee (her glass): one light-brown colour from the bottom up.
+  const mixedGeo = new THREE.CylinderGeometry(innerR(COFFEE_TOP), innerR(0.55), COFFEE_TOP - 0.55, 40, 1, false);
+  mixedGeo.translate(0, (COFFEE_TOP + 0.55) / 2, 0);
 
   const a = 0.62, r = 0.2, s = new THREE.Shape();
   s.moveTo(-a + r, -a); s.lineTo(a - r, -a); s.quadraticCurveTo(a, -a, a, -a + r);
@@ -46,7 +51,7 @@ function sharedParts() {
   iceGeo.translate(0, 0, -0.45);
 
   shared = {
-    glassGeo, milkGeo, coffeeGeo, iceGeo,
+    glassGeo, milkGeo, layeredGeo, mixedGeo, iceGeo,
     glassMat: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.2, envMapIntensity: 1.5, side: THREE.DoubleSide, depthWrite: false }),
     milkMat: new THREE.MeshStandardMaterial({ color: 0xf1dfc0, roughness: 0.55 }),
     iceMat: new THREE.MeshStandardMaterial({ color: 0xe3eef6, roughness: 0.1, transparent: true, opacity: 0.5, envMapIntensity: 1.6 }),
@@ -55,30 +60,35 @@ function sharedParts() {
   return shared;
 }
 
-/* A glass of cà phê sữa đá. Its coffee is clipped by a plane that follows the glass, so it can tilt. */
-function makeGlass(withIce) {
+/* A glass of coffee. `mixed` = stirred light brown; otherwise milk at the bottom with dark coffee above.
+   The coffee is clipped by a plane that follows the glass, so it can tilt. */
+function makeGlass({ ice, mixed }) {
   const p = sharedParts();
   const root = new THREE.Group();
   const glass = new THREE.Mesh(p.glassGeo, p.glassMat);
   glass.renderOrder = 4;
-  root.add(glass, new THREE.Mesh(p.milkGeo, p.milkMat));
+  root.add(glass);
+  if (!mixed) root.add(new THREE.Mesh(p.milkGeo, p.milkMat));
   const plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 3);
-  const coffee = new THREE.Mesh(p.coffeeGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.22, envMapIntensity: 1.1, side: THREE.DoubleSide, clippingPlanes: [plane] }));
-  const surface = new THREE.Mesh(p.surfGeo, new THREE.MeshStandardMaterial({ color: 0x4a2c1c, roughness: 0.1, envMapIntensity: 1.3 }));
+  const coffeeMat = mixed
+    ? new THREE.MeshStandardMaterial({ color: 0xb98a5a, roughness: 0.35, envMapIntensity: 0.9, side: THREE.DoubleSide, clippingPlanes: [plane] })
+    : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.22, envMapIntensity: 1.1, side: THREE.DoubleSide, clippingPlanes: [plane] });
+  const coffee = new THREE.Mesh(mixed ? p.mixedGeo : p.layeredGeo, coffeeMat);
+  const surface = new THREE.Mesh(p.surfGeo, new THREE.MeshStandardMaterial({ color: mixed ? 0xc59a6b : 0x4a2c1c, roughness: mixed ? 0.3 : 0.1, envMapIntensity: 1.3 }));
   surface.rotation.x = -Math.PI / 2;
   root.add(coffee, surface);
-  const ice = [];
-  if (withIce) {
+  const cubes = [];
+  if (ice) {
     for (let i = 0; i < 3; i++) {
       const m = new THREE.Mesh(p.iceGeo, p.iceMat);
       m.renderOrder = 3;
       m.userData = { ang: i * 2.1 + 0.4, rad: 0.45 + 0.25 * i, ph: i * 1.7, tilt: [0.3, -0.4, 0.2][i] };
-      root.add(m); ice.push(m);
+      root.add(m); cubes.push(m);
     }
   }
   const up = new THREE.Vector3(), pt = new THREE.Vector3(), n = new THREE.Vector3();
   return {
-    root, ice, level: 0,
+    root, level: 0,
     setLevel(level, time, still) {
       this.level = level;
       surface.position.y = level;
@@ -87,34 +97,97 @@ function makeGlass(withIce) {
       up.set(0, 1, 0).transformDirection(root.matrixWorld);
       pt.set(0, level, 0).applyMatrix4(root.matrixWorld);
       plane.setFromNormalAndCoplanarPoint(n.copy(up).negate(), pt);
-      for (const m of ice) {
+      for (const m of cubes) {
         const u = m.userData;
         const bob = still ? 0 : Math.sin(time * 1.1 + u.ph) * 0.07;
-        m.position.set(Math.cos(u.ang + (still ? 0 : time * 0.05)) * u.rad, level - 0.12 + bob, Math.sin(u.ang + (still ? 0 : time * 0.05)) * u.rad);
+        const a = u.ang + (still ? 0 : time * 0.05);
+        m.position.set(Math.cos(a) * u.rad, level - 0.12 + bob, Math.sin(a) * u.rad);
         m.rotation.set(u.tilt, u.ang + (still ? 0 : time * 0.12), 0.15 * u.tilt);
       }
     },
   };
 }
 
-/* ---------- Phin with a dripping drop ---------- */
 function makePhin(steel) {
   const g = new THREE.Group();
   const body = [[0, 0.05], [3.9, 0], [4.0, 0.06], [4.0, 0.28], [3.1, 0.28], [2.78, 0.36], [2.78, 3.7], [2.62, 3.7], [2.62, 0.5], [0, 0.5]];
-  g.add(new THREE.Mesh(new THREE.LatheGeometry(body.map(([r, y]) => new THREE.Vector2(Math.max(r, 0.001), y)), 56), steel));
+  g.add(new THREE.Mesh(new THREE.LatheGeometry(body.map(([r, y]) => new THREE.Vector2(Math.max(r, 0.001), y)), 48), steel));
   const lid = [new THREE.Vector2(3.02, 3.6), new THREE.Vector2(3.02, 3.74)];
   for (let a = 0; a <= 12; a++) {
     const t = (a / 12) * (Math.PI / 2);
     lid.push(new THREE.Vector2(Math.max(2.96 * Math.cos(t), 0.001), 3.74 + 1.25 * Math.sin(t)));
   }
-  g.add(new THREE.Mesh(new THREE.LatheGeometry(lid, 56), steel));
+  g.add(new THREE.Mesh(new THREE.LatheGeometry(lid, 48), steel));
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.3, 12), steel); stem.position.y = 5.1;
   const knob = new THREE.Mesh(new THREE.SphereGeometry(0.34, 20, 12), steel); knob.position.y = 5.42;
   g.add(stem, knob);
   return g;
 }
 
-/* ---------- Helpers for limbs ---------- */
+/* A long spoon standing in the glass. */
+function makeSpoon(steel) {
+  const g = new THREE.Group();
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.2, 10.6, 12), steel);
+  handle.position.y = 5.6;
+  const bowl = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), steel);
+  bowl.scale.set(0.7, 1.05, 0.26); bowl.position.y = 0.3;
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8), steel); tip.position.y = 10.95;
+  g.add(handle, bowl, tip);
+  return g;
+}
+
+/* ---------- The red plastic stool ---------- */
+const SEAT = 7.5;
+const STOOL = 11;      // width of the square top
+
+function makeStool(red, darkRed) {
+  const g = new THREE.Group();
+  const half = STOOL / 2, rad = 2.2;
+  // top slab with rounded corners
+  const s = new THREE.Shape();
+  s.moveTo(-half + rad, -half); s.lineTo(half - rad, -half); s.quadraticCurveTo(half, -half, half, -half + rad);
+  s.lineTo(half, half - rad); s.quadraticCurveTo(half, half, half - rad, half);
+  s.lineTo(-half + rad, half); s.quadraticCurveTo(-half, half, -half, half - rad);
+  s.lineTo(-half, -half + rad); s.quadraticCurveTo(-half, -half, -half + rad, -half);
+  const slabGeo = new THREE.ExtrudeGeometry(s, { depth: 0.9, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 3, curveSegments: 8 });
+  slabGeo.rotateX(-Math.PI / 2);
+  const slab = new THREE.Mesh(slabGeo, red);
+  slab.position.y = SEAT - 1.1 - 0.2 + 0.2;
+  g.add(slab);
+  // hand hole and a few ridges on top
+  const hole = new THREE.Mesh(new THREE.CircleGeometry(0.95, 24), darkRed);
+  hole.rotation.x = -Math.PI / 2; hole.position.set(2.7, SEAT + 0.005, -2.9);
+  g.add(hole);
+  for (let i = -2; i <= 2; i++) {
+    const r = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 8.6), darkRed);
+    r.position.set(i * 1.8, SEAT + 0.01, 0); g.add(r);
+  }
+  // four arched side panels: they read as legs with an arch between them
+  const pw = STOOL - 2.4, ph = SEAT - 1.1 + 0.5, leg = 1.5;
+  const sh = new THREE.Shape();
+  sh.moveTo(-pw / 2, 0); sh.lineTo(-pw / 2 + leg, 0); sh.lineTo(-pw / 2 + leg, ph * 0.5);
+  sh.quadraticCurveTo(0, ph * 0.5 + (pw - 2 * leg) * 0.62, pw / 2 - leg, ph * 0.5);
+  sh.lineTo(pw / 2 - leg, 0); sh.lineTo(pw / 2, 0); sh.lineTo(pw / 2, ph); sh.lineTo(-pw / 2, ph); sh.lineTo(-pw / 2, 0);
+  const panelGeo = new THREE.ExtrudeGeometry(sh, { depth: 0.55, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.12, bevelSegments: 2, curveSegments: 12 });
+  panelGeo.translate(0, 0, -0.275);
+  const e = half - 0.9;
+  for (let i = 0; i < 4; i++) {
+    const m = new THREE.Mesh(panelGeo, red);
+    const a = (i * Math.PI) / 2;
+    m.rotation.y = a;
+    m.position.set(Math.sin(a) * e, 0.05, Math.cos(a) * e);
+    g.add(m);
+  }
+  // little corner feet blocks so the corners look solid
+  for (const [x, z] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(1.9, ph, 1.9), red);
+    b.position.set(x * (half - 1.15), ph / 2 + 0.05, z * (half - 1.15));
+    g.add(b);
+  }
+  return g;
+}
+
+/* ---------- Limb helpers ---------- */
 const _d = new THREE.Vector3(), _p = new THREE.Vector3(), _dir = new THREE.Vector3();
 function limb(r, mat) { return new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 14), mat); }
 function setLimb(m, A, B) {
@@ -124,7 +197,6 @@ function setLimb(m, A, B) {
   m.scale.set(1, len, 1);
   m.quaternion.setFromUnitVectors(UP, _d.multiplyScalar(1 / len));
 }
-// Two-bone IK: where the elbow (or knee) goes for a given shoulder and hand.
 function elbow(S, T, a, b, pole, out) {
   const d = M.clamp(S.distanceTo(T), 0.01, a + b - 0.02);
   _dir.copy(T).sub(S).normalize();
@@ -135,7 +207,6 @@ function elbow(S, T, a, b, pole, out) {
 }
 const smooth = (t) => t * t * (3 - 2 * t);
 
-/* ---------- The scene ---------- */
 function studio() {
   const s = new THREE.Scene();
   const c = document.createElement('canvas');
@@ -155,7 +226,24 @@ function studio() {
   return s;
 }
 
-const SEAT = 7.5;           // height of the stool seat
+// A yellow five-point star on a transparent canvas, for the flag shirt.
+function starTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = '#ffd60a';
+  g.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const r = i % 2 === 0 ? 100 : 40;
+    g.lineTo(128 + Math.cos(a) * r, 136 + Math.sin(a) * r);
+  }
+  g.closePath(); g.fill();
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
 
 export function startCoffee({ canvas, stage, onReady }) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -177,89 +265,64 @@ export function startCoffee({ canvas, stage, onReady }) {
   const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 300);
   const fov = M.degToRad(camera.fov);
 
-  scene.add(new THREE.HemisphereLight(0xfff4e4, 0x6b5a4a, 0.8));
+  scene.add(new THREE.HemisphereLight(0xfff4e4, 0x6b7a9a, 0.85));
   const key = new THREE.DirectionalLight(0xfff1dc, 2.4);
   key.position.set(-14, 26, 22);
   scene.add(key);
-  const rim = new THREE.DirectionalLight(0xdfe9ff, 1.0);
+  const rim = new THREE.DirectionalLight(0xdfe9ff, 1.1);
   rim.position.set(16, 10, -18);
   scene.add(rim);
 
   const world = new THREE.Group();
   scene.add(world);
 
-  /* soft shadows on the ground */
   const blob = (x, z, w, a) => {
     const c = document.createElement('canvas');
     c.width = c.height = 128;
     const g = c.getContext('2d');
     const gr = g.createRadialGradient(64, 64, 4, 64, 64, 64);
-    gr.addColorStop(0, `rgba(30,18,10,${a})`); gr.addColorStop(1, 'rgba(30,18,10,0)');
+    gr.addColorStop(0, `rgba(8,18,40,${a})`); gr.addColorStop(1, 'rgba(8,18,40,0)');
     g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, w), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
     m.rotation.x = -Math.PI / 2; m.position.set(x, -0.02, z);
     world.add(m);
   };
-  blob(0.5, 3, 24, 0.32);
-  blob(-15.5, 0, 20, 0.3);
+  blob(0.5, 3, 26, 0.45);
+  blob(-15.2, 0, 21, 0.42);
 
   /* materials */
-  const red = new THREE.MeshStandardMaterial({ color: 0xc8141b, roughness: 0.32, envMapIntensity: 0.9 });
-  const skin = new THREE.MeshStandardMaterial({ color: 0xeec3a4, roughness: 0.55 });
-  const hairM = new THREE.MeshStandardMaterial({ color: 0x1b1412, roughness: 0.4, envMapIntensity: 1.2 });
-  const shirt = new THREE.MeshStandardMaterial({ color: 0x3e7d4c, roughness: 0.7 });
-  const shorts = new THREE.MeshStandardMaterial({ color: 0xe8dac0, roughness: 0.75 });
+  const red = new THREE.MeshStandardMaterial({ color: 0xb4271b, roughness: 0.5, envMapIntensity: 0.7 });
+  const darkRed = new THREE.MeshStandardMaterial({ color: 0x7e1a12, roughness: 0.6 });
+  const skin = new THREE.MeshStandardMaterial({ color: 0xf7e3d3, roughness: 0.6 });
+  const hairM = new THREE.MeshStandardMaterial({ color: 0x0d0a09, roughness: 0.38, envMapIntensity: 1.3, side: THREE.DoubleSide });
+  const shirt = new THREE.MeshStandardMaterial({ color: 0xd9241c, roughness: 0.7 });
+  const jeans = new THREE.MeshStandardMaterial({ color: 0x2c4f8a, roughness: 0.8 });
   const shoeW = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.4 });
-  const sole = new THREE.MeshStandardMaterial({ color: 0x2f5d3a, roughness: 0.6 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x241913, roughness: 0.6 });
-  const steel = new THREE.MeshStandardMaterial({ color: 0xd9dde2, metalness: 1, roughness: 0.28, envMapIntensity: 1.25, side: THREE.DoubleSide });
-  const tableTop = new THREE.MeshStandardMaterial({ color: 0xece3d3, roughness: 0.5 });
-  const iron = new THREE.MeshStandardMaterial({ color: 0x4a4540, metalness: 0.7, roughness: 0.45 });
-  const blush = new THREE.MeshBasicMaterial({ color: 0xf08a8a, transparent: true, opacity: 0.5 });
+  const sole = new THREE.MeshStandardMaterial({ color: 0xe3a62a, roughness: 0.6 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x120d0b, roughness: 0.5 });
+  const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+  const steel = new THREE.MeshStandardMaterial({ color: 0xc9ced6, metalness: 1, roughness: 0.22, envMapIntensity: 1.35, side: THREE.DoubleSide });
+  const blush = new THREE.MeshBasicMaterial({ color: 0xf08a96, transparent: true, opacity: 0.55 });
 
-  /* ---- red plastic stool ---- */
-  {
-    const g = new THREE.Group();
-    const seat = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 4.7, 1.2, 48), red); seat.position.y = SEAT - 0.6;
-    const rimT = new THREE.Mesh(new THREE.TorusGeometry(5.0, 0.38, 12, 48), red); rimT.rotation.x = Math.PI / 2; rimT.position.y = SEAT - 0.12;
-    g.add(seat, rimT);
-    for (let i = 0; i < 4; i++) {
-      const a = Math.PI / 4 + (i * Math.PI) / 2;
-      const top = new THREE.Vector3(Math.cos(a) * 3.4, SEAT - 1.1, Math.sin(a) * 3.4);
-      const bot = new THREE.Vector3(Math.cos(a) * 4.9, 0.3, Math.sin(a) * 4.9);
-      const l = limb(0.6, red); setLimb(l, top, bot); g.add(l);
-      const foot = new THREE.Mesh(new THREE.SphereGeometry(0.62, 12, 8), red); foot.position.copy(bot); g.add(foot);
-    }
-    const brace = new THREE.Mesh(new THREE.TorusGeometry(4.15, 0.28, 10, 48), red); brace.rotation.x = Math.PI / 2; brace.position.y = 3.1;
-    g.add(brace);
-    world.add(g);
-  }
+  /* ---- stool the girl sits on ---- */
+  const YAW = -0.72;                      // she turns toward the phin, so the sip is seen in profile
+  const stool1 = makeStool(red, darkRed);
+  stool1.rotation.y = YAW;
+  world.add(stool1);
 
-  /* ---- low table with the phin and a glass ---- */
-  const TABLE = new THREE.Vector3(-15.5, 0, 0);
-  const TABLE_TOP = 9.5;
-  const tbl = new THREE.Group();
-  tbl.position.copy(TABLE);
-  {
-    const top = new THREE.Mesh(new THREE.CylinderGeometry(7.2, 7.2, 0.7, 48), tableTop); top.position.y = TABLE_TOP - 0.35;
-    const edge = new THREE.Mesh(new THREE.TorusGeometry(7.2, 0.2, 8, 48), iron); edge.rotation.x = Math.PI / 2; edge.position.y = TABLE_TOP - 0.35;
-    tbl.add(top, edge);
-    for (let i = 0; i < 3; i++) {
-      const a = Math.PI / 2 + (i * 2 * Math.PI) / 3;
-      const l = limb(0.34, iron);
-      setLimb(l, new THREE.Vector3(Math.cos(a) * 4.8, TABLE_TOP - 0.6, Math.sin(a) * 4.8), new THREE.Vector3(Math.cos(a) * 6.3, 0.1, Math.sin(a) * 6.3));
-      tbl.add(l);
-    }
-    world.add(tbl);
-  }
-  const SET_SCALE = 0.55;
-  const tableGlass = makeGlass(true);
+  /* ---- second stool as a table: the phin and its glass ---- */
+  const stool2 = makeStool(red, darkRed);
+  stool2.position.set(-15.4, 0, 0.4);
+  stool2.rotation.y = 0.25;
+  world.add(stool2);
+  const SET_SCALE = 0.78;
+  const tableGlass = makeGlass({ ice: true, mixed: false });
   const phinSet = new THREE.Group();
-  phinSet.position.set(0, TABLE_TOP, 0.2);
+  phinSet.position.set(-15.4, SEAT, 0.4);
   phinSet.scale.setScalar(SET_SCALE);
   const phin = makePhin(steel); phin.position.y = GLASS_H;
   phinSet.add(tableGlass.root, phin);
-  tbl.add(phinSet);
+  world.add(phinSet);
 
   const drop = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 12), new THREE.MeshStandardMaterial({ color: 0x3b2417, roughness: 0.12, envMapIntensity: 1.3 }));
   drop.visible = false; drop.renderOrder = 2;
@@ -270,49 +333,73 @@ export function startCoffee({ canvas, stage, onReady }) {
 
   /* ---- the girl ---- */
   const girl = new THREE.Group();
+  girl.rotation.y = YAW;
   world.add(girl);
-  const upper = new THREE.Group();            // torso, head and arms' shoulders lean from the hips
+  const upper = new THREE.Group();
   upper.position.set(0, SEAT + 0.9, 0.3);
   girl.add(upper);
 
-  const hips = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), shorts); hips.scale.set(3.7, 2.3, 3.3); hips.position.set(0, SEAT + 1.1, 0.3);
+  const hips = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), jeans); hips.scale.set(3.7, 2.3, 3.3); hips.position.set(0, SEAT + 1.1, 0.3);
   girl.add(hips);
   const torso = new THREE.Mesh(new THREE.CapsuleGeometry(3.3, 3.6, 6, 20), shirt);
   torso.position.set(0, 4.6, 0); torso.scale.set(1, 1, 0.9);
   upper.add(torso);
+  // yellow star on the chest: a patch of cylinder that hugs the torso
+  {
+    const arc = 3.6 / 3.34;
+    const patch = new THREE.Mesh(
+      new THREE.CylinderGeometry(3.34, 3.34, 3.6, 28, 1, true, -arc / 2, arc),
+      new THREE.MeshStandardMaterial({ map: starTexture(), transparent: true, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),
+    );
+    patch.position.set(0, 5.0, 0); patch.scale.set(1, 1, 0.9);
+    upper.add(patch);
+  }
   const neck = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.2, 1.4, 14), skin); neck.position.set(0, 8.7, 0.1);
   upper.add(neck);
 
-  const head = new THREE.Group();             // pivots at the neck
+  const head = new THREE.Group();
   head.position.set(0, 9.0, 0.1);
   upper.add(head);
-  const HEAD_C = new THREE.Vector3(0, 4.0, 0.4);   // head centre, relative to neck pivot
-  const skull = new THREE.Mesh(new THREE.SphereGeometry(4.7, 40, 28), skin); skull.position.copy(HEAD_C);
+  const HC = new THREE.Vector3(0, 4.0, 0.4);
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(4.7, 40, 28), skin); skull.position.copy(HC);
   head.add(skull);
+
+  // long straight black hair, parted, with a lock down each side of the face
   const wedge = 0.95;
-  const hairBack = new THREE.Mesh(new THREE.SphereGeometry(4.95, 40, 24, Math.PI / 2 + wedge, Math.PI * 2 - 2 * wedge, 0, Math.PI * 0.64), hairM);
-  hairBack.position.copy(HEAD_C); hairBack.material.side = THREE.DoubleSide;
-  const bangs = new THREE.Mesh(new THREE.SphereGeometry(4.95, 40, 16, Math.PI / 2 - wedge - 0.1, 2 * wedge + 0.2, 0, Math.PI * 0.34), hairM);
-  bangs.position.copy(HEAD_C); bangs.material.side = THREE.DoubleSide;
-  head.add(hairBack, bangs);
-  const pony = new THREE.Group();             // ponytail swings from a hair tie
-  pony.position.set(0, HEAD_C.y + 2.6, HEAD_C.z - 4.6);
-  const tie = new THREE.Mesh(new THREE.SphereGeometry(0.75, 14, 10), sole); pony.add(tie);
-  const tail = new THREE.Mesh(new THREE.CapsuleGeometry(1.05, 4.2, 6, 14), hairM); tail.position.set(0, -2.9, -0.2);
-  pony.add(tail);
-  head.add(pony);
-  const faceZ = (x, y) => HEAD_C.z + Math.sqrt(Math.max(4.7 * 4.7 - x * x - (y - HEAD_C.y) * (y - HEAD_C.y), 0)) - 0.05;
+  const hairBack = new THREE.Mesh(new THREE.SphereGeometry(4.98, 40, 24, Math.PI / 2 + wedge, Math.PI * 2 - 2 * wedge, 0, Math.PI * 0.7), hairM);
+  hairBack.position.copy(HC);
+  const bangs = new THREE.Mesh(new THREE.SphereGeometry(4.98, 40, 16, Math.PI / 2 - wedge - 0.1, 2 * wedge + 0.2, 0, Math.PI * 0.33), hairM);
+  bangs.position.copy(HC);
+  const longBack = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), hairM);
+  longBack.scale.set(4.4, 8.6, 3.0); longBack.position.set(0, HC.y - 4.2, HC.z - 3.3);
+  head.add(hairBack, bangs, longBack);
+  const locks = [-1, 1].map((side) => {
+    const lock = new THREE.Group();
+    lock.position.set(side * 4.75, HC.y + 0.4, HC.z + 1.5);
+    const m = new THREE.Mesh(new THREE.CapsuleGeometry(0.62, 8.4, 6, 14), hairM);
+    m.scale.set(1, 1, 0.5); m.position.y = -4.6;
+    lock.add(m);
+    head.add(lock);
+    return lock;
+  });
+  const faceZ = (x, y) => HC.z + Math.sqrt(Math.max(4.7 * 4.7 - x * x - (y - HC.y) * (y - HC.y), 0)) - 0.05;
+  const eyes = [];
   for (const sx of [-1, 1]) {
-    const eye = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.12, 8, 18, Math.PI), dark);
-    eye.position.set(sx * 1.95, HEAD_C.y - 0.2, faceZ(sx * 1.95, HEAD_C.y - 0.2)); head.add(eye);
-    const b = new THREE.Mesh(new THREE.CircleGeometry(0.85, 20), blush);
-    const bp = new THREE.Vector3(sx * 3.1, HEAD_C.y - 1.5, 0); bp.z = faceZ(bp.x, bp.y) + 0.02;
+    const eye = new THREE.Group();
+    const ey = HC.y + 0.1;
+    eye.position.set(sx * 1.95, ey, faceZ(sx * 1.95, ey) + 0.02);
+    const sclera = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), white); sclera.scale.set(1.12, 1.25, 0.34);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), dark); pupil.scale.set(0.58, 0.68, 0.3); pupil.position.set(sx * -0.05, 0, 0.3);
+    eye.add(sclera, pupil);
+    head.add(eye);
+    eyes.push({ eye, pupil, base: pupil.position.clone() });
+    const b = new THREE.Mesh(new THREE.CircleGeometry(0.95, 20), blush);
+    const bp = new THREE.Vector3(sx * 3.2, HC.y - 1.7, 0); bp.z = faceZ(bp.x, bp.y) + 0.02;
     b.position.copy(bp); b.lookAt(bp.x * 1.8, bp.y, bp.z * 1.8 + 2); head.add(b);
   }
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.1, 8, 16, Math.PI), dark);
-  mouth.rotation.z = Math.PI; mouth.position.set(0, HEAD_C.y - 1.9, faceZ(0, HEAD_C.y - 1.9)); head.add(mouth);
+  const mouth = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.55, 4, 8), dark);
+  mouth.rotation.z = Math.PI / 2; mouth.position.set(0, HC.y - 2.15, faceZ(0, HC.y - 2.15)); head.add(mouth);
 
-  /* limbs */
   const arms = [-1, 1].map((side) => ({
     side,
     upperArm: limb(1.0, shirt), fore: limb(0.88, skin),
@@ -324,8 +411,8 @@ export function startCoffee({ canvas, stage, onReady }) {
   }));
   const legs = [-1, 1].map((side) => ({
     side,
-    thigh: limb(1.5, shorts), shin: limb(1.15, skin),
-    hip: new THREE.Mesh(new THREE.SphereGeometry(1.5, 14, 10), shorts),
+    thigh: limb(1.5, jeans), shin: limb(1.15, skin),
+    hip: new THREE.Mesh(new THREE.SphereGeometry(1.5, 14, 10), jeans),
     knee: new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 8), skin),
     shoe: new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), shoeW),
     soleM: new THREE.Mesh(new THREE.SphereGeometry(1, 20, 10), sole),
@@ -335,14 +422,19 @@ export function startCoffee({ canvas, stage, onReady }) {
   for (const a of arms) girl.add(a.upperArm, a.fore, a.sh, a.el, a.hand);
   for (const l of legs) { girl.add(l.thigh, l.shin, l.hip, l.knee, l.shoe, l.soleM); l.shoe.scale.set(1.5, 1.0, 2.5); l.soleM.scale.set(1.55, 0.38, 2.6); }
 
-  const held = makeGlass(true);
-  const GS = 0.55;                            // glass scale in her hand
+  const held = makeGlass({ ice: true, mixed: true });
+  const GS = 0.55;
   held.root.scale.setScalar(GS);
+  const spoonPivot = new THREE.Group();            // the spoon leans in the glass and stirs
+  const spoon = makeSpoon(steel);
+  spoon.position.set(-1.1, 0.9, 0); spoon.rotation.z = -0.19;
+  spoonPivot.add(spoon);
+  held.root.add(spoonPivot);
   girl.add(held.root);
 
   /* ---- animation ---- */
   const CYCLE = 7;
-  const phase = (t) => {                      // 0 = glass at chest, 1 = glass at mouth
+  const phase = (t) => {
     const k = t % CYCLE;
     if (k < 2) return 0;
     if (k < 3) return smooth(k - 2);
@@ -352,12 +444,11 @@ export function startCoffee({ canvas, stage, onReady }) {
   };
   const lerpV = (a, b, s, out) => out.set(M.lerp(a[0], b[0], s), M.lerp(a[1], b[1], s), M.lerp(a[2], b[2], s));
   const RIM_REST = [3.0, 17.0, 5.6], RIM_MOUTH = [0.3, 20.6, 4.9];
-  const tmpRim = new THREE.Vector3(), tmpUp = new THREE.Vector3(), tmpS = new THREE.Vector3(), tmpO = new THREE.Vector3();
+  const tmpRim = new THREE.Vector3(), tmpUp = new THREE.Vector3(), tmpO = new THREE.Vector3();
   const qTilt = new THREE.Quaternion(), eul = new THREE.Euler();
-  const sipLevel = (t) => {                   // her glass goes down a little with each sip, then is refilled
-    const n = Math.floor((t - 3.7) / CYCLE) + 1;      // sips so far
-    const target = 7.0 - 0.6 * (((n % 6) + 6) % 6);
-    return Math.max(target, 2.8);
+  const sipLevel = (t) => {
+    const n = Math.floor((t - 3.7) / CYCLE) + 1;
+    return Math.max(7.0 - 0.6 * (((n % 6) + 6) % 6), 2.8);
   };
   let lvl = 7.0, time = 0;
   const tableLevel = (t) => (reduced ? 6.9 : MILK_TOP + 0.1 + 4.6 * (1 - Math.exp(-t / 5.5)));
@@ -368,32 +459,38 @@ export function startCoffee({ canvas, stage, onReady }) {
     const s = reduced ? 0 : phase(t);
     const idle = reduced ? 0 : Math.sin(t * 1.6);
 
-    // body
     upper.rotation.x = 0.05 + 0.03 * s;
     upper.scale.y = 1 + 0.008 * idle;
     head.rotation.x = -0.2 * s + 0.01 * idle;
     head.rotation.z = reduced ? 0 : Math.sin(t * 0.5) * 0.03;
-    pony.rotation.x = reduced ? 0.15 : 0.25 + Math.sin(t * 1.9) * 0.1 + 0.2 * s;
-    pony.rotation.z = reduced ? 0 : Math.sin(t * 1.3) * 0.07;
+    // hair swings a little
+    for (const [i, l] of locks.entries()) l.rotation.z = (reduced ? 0 : Math.sin(t * 1.3 + i) * 0.05) + (i === 0 ? 0.05 : -0.05);
+    longBack.rotation.x = reduced ? 0 : Math.sin(t * 1.1) * 0.03 + 0.2 * s * 0.1;
     mouth.visible = s < 0.45;
+    // big round eyes: look toward the glass, glance up while sipping, blink now and then
+    const blink = reduced ? 1 : (t % 4.6 > 4.46 ? 0.08 : 1);
+    for (const e of eyes) {
+      e.eye.scale.y = M.lerp(e.eye.scale.y, blink, 0.6);
+      e.pupil.position.set(e.base.x + 0.28 - 0.1 * s, e.base.y - 0.12 + 0.3 * s, e.base.z);
+    }
 
-    // glass: rim position and tilt follow the lift
+    // glass
     lerpV(RIM_REST, RIM_MOUTH, s, tmpRim);
     const tilt = M.degToRad(38) * s;
     tmpUp.set(0, Math.cos(tilt), -Math.sin(tilt));
-    tmpO.copy(tmpRim).addScaledVector(tmpUp, -GLASS_H * GS);       // glass base
+    tmpO.copy(tmpRim).addScaledVector(tmpUp, -GLASS_H * GS);
     held.root.position.copy(tmpO);
     eul.set(-tilt, 0, 0); qTilt.setFromEuler(eul); held.root.quaternion.copy(qTilt);
+    spoonPivot.rotation.y = reduced ? 0.6 : t * 1.4 * (1 - s) + 0.6;
     const target = reduced ? 6.6 : sipLevel(t);
     lvl += (target - lvl) * Math.min(dt * 1.6, 1);
     held.setLevel(lvl, t, reduced);
 
-    // arms (shoulders follow the lean)
-    upper.updateMatrixWorld(true);
+    // arms
+    girl.updateMatrixWorld(true);
     for (const a of arms) {
-      a.S.set(a.side * 3.5, 4.0 + 4.0, 0.0).set(a.side * 3.55, 8.0, 0.1);   // shoulder, in torso space
-      a.S.y += 0.3;
-      upper.localToWorld(a.S);
+      a.S.set(a.side * 3.55, 8.3, 0.1);
+      upper.localToWorld(a.S); girl.worldToLocal(a.S);
       if (a.side > 0) a.T.copy(tmpRim).addScaledVector(tmpUp, -(GLASS_H * GS) * 0.62);
       else a.T.set(-2.6, SEAT + 4.6, 4.6);
       elbow(a.S, a.T, 4.5, 4.3, a.pole, a.E);
@@ -401,9 +498,8 @@ export function startCoffee({ canvas, stage, onReady }) {
       a.sh.position.copy(a.S); a.el.position.copy(a.E); a.hand.position.copy(a.T);
     }
 
-    // legs: left foot taps along
+    // legs: left foot taps
     for (const l of legs) {
-      l.K.set(l.side * 2.35, SEAT + 1.5, 5.6);
       l.A.set(l.side * 2.5, 1.35, 6.9);
       if (l.side < 0 && !reduced) { const tap = Math.max(0, Math.sin(t * 3.2)); l.A.y += 0.6 * tap; l.A.z -= 0.25 * tap; }
       elbow(l.H, l.A, 5.4, 7.9, l.pole, l.K);
@@ -413,7 +509,7 @@ export function startCoffee({ canvas, stage, onReady }) {
       l.soleM.position.set(l.A.x, l.A.y - 0.95, l.A.z + 0.8);
     }
 
-    // table: the glass fills as the phin drips
+    // phin glass fills as it drips
     tableGlass.setLevel(tableLevel(t), t, reduced);
     if (!reduced) {
       const level = tableGlass.level;
@@ -443,8 +539,8 @@ export function startCoffee({ canvas, stage, onReady }) {
     }
   }
 
-  /* ---- camera: slow drift, tilt with the pointer, drag to look around ---- */
-  const CENTER = new THREE.Vector3(-5.5, 11.5, 1.5);
+  /* ---- camera ---- */
+  const CENTER = new THREE.Vector3(-7.0, 12.2, 1.5);
   let dist = 80, az = 0.38, azBase = 0.38, tilt = 0, tiltT = 0, drag = null, dragStart = 0;
   function resize() {
     const w = stage.clientWidth, h = stage.clientHeight;
@@ -452,7 +548,7 @@ export function startCoffee({ canvas, stage, onReady }) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    dist = Math.max((34 / 2) / Math.tan(fov / 2), (40 / 2) / (Math.tan(fov / 2) * camera.aspect));
+    dist = Math.max((29 / 2) / Math.tan(fov / 2), (36 / 2) / (Math.tan(fov / 2) * camera.aspect));
     if (reduced) render();
   }
   function render() {
@@ -475,7 +571,7 @@ export function startCoffee({ canvas, stage, onReady }) {
   canvas.addEventListener('pointercancel', end);
   if (!reduced) addEventListener('pointermove', (e) => { tiltT = (e.clientY / innerHeight - 0.5) * 0.8; }, { passive: true });
 
-  // /?coffee=3.4 jumps the animation clock, handy for screenshots.
+  // /?coffee=3.4 jumps the animation clock; &freeze=1 stops it. Handy for screenshots.
   const params = new URLSearchParams(location.search);
   const jump = Number(params.get('coffee'));
   if (jump > 0) { for (let n = 0; n < jump * 60; n++) step(1 / 60); } else step(0);
@@ -498,7 +594,6 @@ export function startCoffee({ canvas, stage, onReady }) {
       if (first) { first = false; onReady && onReady(); }
     })(last);
   }
-  // Compile shaders without blocking the page, then start drawing.
   if (renderer.compileAsync) renderer.compileAsync(scene, camera).then(begin, begin);
   else begin();
   return true;
