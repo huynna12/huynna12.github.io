@@ -12,27 +12,28 @@
   <meta property="og:image" content="https://huynna12.github.io/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Huynh Ho, CS and Math student building backend and infrastructure software in Go and Python.">
+  <meta property="og:image:alt" content="Huynh Ho. A line drawing of a Vietnamese phin filter dripping coffee into a glass.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="theme-color" content="#0b0d1a">
+  <meta name="theme-color" content="#f6efe3">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://huynna12.github.io/">
-  <link rel="preload" href="fonts/Bricolage.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=9">
+  <link rel="preload" href="fonts/BeVietnamPro-n300-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/BeVietnamPro-n500-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
-  <div class="xp" aria-hidden="true"><span id="xp"></span></div>
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
 
   <header class="bar">
-    <a class="brand" href="#top"><span id="logo" aria-hidden="true"></span>Huynh Ho</a>
+    <a class="brand" href="#top">Huynh Ho</a>
     <nav aria-label="Sections">
       <ul>
         <li><a href="#open-source">Open source</a></li>
         <li><a href="#projects">Projects</a></li>
         <li><a href="#skills">Skills</a></li>
         <li><a href="#background">Background</a></li>
-        <li><a href="#side-quests">Side quests</a></li>
+        <li><a href="#outside-work">Outside work</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
@@ -41,75 +42,88 @@
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="hero-text">
-        <p class="kicker">Hi, I'm <span id="pref"></span></p>
-        <h1 id="hero-title"><span id="name"></span></h1>
+        <p class="hello">Xin chào, mình là <span id="pref"></span>.</p>
+        <h1 id="hero-title"><span id="name"></span><i class="dot">.</i></h1>
         <p class="lead" id="tagline"></p>
         <p class="seeking" id="seeking"></p>
         <div class="buttons" id="hero-buttons"></div>
       </div>
-      <div class="stage-col" id="stage-col">
-        <div class="stage" id="stage" aria-hidden="true">
-          <canvas id="board"></canvas>
-          <div class="blk-layer" id="blocklabels"></div>
-          <div class="hud"><span>NOW <b id="now">&nbsp;</b></span><span>LINES <b id="lines">00</b></span></div>
-        </div>
-        <ul class="legend" id="legend" aria-label="Color key for the falling blocks"></ul>
-        <div class="controls">
-          <button class="btn" id="play" type="button" aria-pressed="false" disabled>Take over</button>
-          <p class="hint" id="hint" aria-live="polite">Each block is something I work with. Take over if you like.</p>
-        </div>
-        <div class="pad" id="pad" hidden>
-          <button type="button" data-act="left" aria-label="Move left">&larr;</button>
-          <button type="button" data-act="rotate" aria-label="Rotate">&#8635;</button>
-          <button type="button" data-act="right" aria-label="Move right">&rarr;</button>
-          <button type="button" data-act="soft" aria-label="Soft drop">&darr;</button>
-          <button type="button" data-act="drop" aria-label="Hard drop">Drop</button>
-        </div>
-      </div>
+
+      <figure class="phin" aria-label="A line drawing of a Vietnamese phin filter dripping coffee into a glass">
+        <svg viewBox="0 0 240 320" role="img" aria-hidden="true">
+          <defs>
+            <clipPath id="glass-clip"><path d="M80.5 153 L93.7 289 H146.3 L159.5 153 Z"/></clipPath>
+          </defs>
+          <!-- liquid, clipped to the glass -->
+          <g clip-path="url(#glass-clip)">
+            <rect class="liq-milk" x="70" y="258" width="100" height="34"/>
+            <rect class="liq-coffee" x="70" y="153" width="100" height="105"/>
+            <rect class="ice" x="104" y="176" width="22" height="22" rx="4" transform="rotate(-8 115 187)"/>
+            <rect class="ice" x="124" y="204" width="20" height="20" rx="4" transform="rotate(10 134 214)"/>
+          </g>
+          <!-- steam -->
+          <path class="steam s1" d="M104 40 q-7 -9 0 -18 q7 -9 0 -18"/>
+          <path class="steam s2" d="M126 36 q-7 -9 0 -18 q7 -9 0 -18"/>
+          <!-- phin: lid, chamber, plate -->
+          <circle class="line" cx="120" cy="60" r="4"/>
+          <path class="line" d="M84 84 q36 -30 72 0"/>
+          <path class="line" d="M76 84 H164"/>
+          <path class="line" d="M79 84 L86 140 H154 L161 84"/>
+          <rect class="line" x="62" y="140" width="116" height="7" rx="3.5"/>
+          <!-- glass -->
+          <path class="line" d="M78 148 L92 292 H148 L162 148"/>
+          <path class="line soft" d="M98 285 H142"/>
+          <path class="line" d="M52 294 H188"/>
+          <!-- drip -->
+          <path class="drop" d="M120 151 q-4.5 7 0 11 q4.5 -4 0 -11z"/>
+        </svg>
+        <figcaption>cà phê sữa đá</figcaption>
+      </figure>
     </section>
 
-    <section class="sheet-wrap" aria-label="Character sheet">
-      <p class="sheet-title">Character sheet</p>
-      <dl id="sheet" class="sheet"></dl>
+    <section class="glance-wrap" aria-label="At a glance">
+      <p class="eyebrow">At a glance</p>
+      <dl id="glance" class="glance"></dl>
     </section>
 
     <section id="open-source" aria-labelledby="os-title">
-      <p class="num" data-piece="T">Level 01</p>
-      <h2 id="os-title">Open source</h2>
-      <p class="intro">Each merged pull request is a cleared line. Every PR number links to GitHub.</p>
+      <p class="km">km 5</p>
+      <h2 id="os-title">Open source <em>Mã nguồn mở</em></h2>
+      <p class="intro">Merged pull requests in real projects. Every PR number links to GitHub.</p>
       <div id="os-list"></div>
     </section>
 
     <section id="projects" aria-labelledby="proj-title">
-      <p class="num" data-piece="L">Level 02</p>
-      <h2 id="proj-title">Projects</h2>
+      <p class="km">km 10</p>
+      <h2 id="proj-title">Projects <em>Dự án</em></h2>
       <div id="proj-list"></div>
     </section>
 
     <section id="skills" aria-labelledby="skills-title">
-      <p class="num" data-piece="S">Level 03</p>
-      <h2 id="skills-title">Skills</h2>
-      <p class="intro">Inventory.</p>
-      <dl id="skills-list" class="inventory"></dl>
+      <p class="km">km 15</p>
+      <h2 id="skills-title">Skills <em>Kỹ năng</em></h2>
+      <dl id="skills-list" class="menu"></dl>
     </section>
 
     <section id="background" aria-labelledby="bg-title">
-      <p class="num" data-piece="O">Level 04</p>
-      <h2 id="bg-title">Education and experience</h2>
+      <p class="km">km 21.1 <span>half marathon</span></p>
+      <h2 id="bg-title">Education and experience <em>Học vấn và kinh nghiệm</em></h2>
       <div id="bg-list"></div>
     </section>
 
-    <section id="side-quests" aria-labelledby="sq-title">
-      <p class="num" data-piece="Z">Bonus level</p>
-      <h2 id="sq-title">Side quests</h2>
-      <ul id="sq-list" class="quests"></ul>
+    <section id="outside-work" aria-labelledby="ow-title">
+      <p class="km">km 30</p>
+      <h2 id="ow-title">Outside work <em>Ngoài giờ làm</em></h2>
+      <ul id="ow-list" class="quests"></ul>
+      <p class="always"><span>Always on</span> <i id="always"></i></p>
     </section>
 
     <section id="contact" aria-labelledby="contact-title">
-      <p class="num" data-piece="J">Final level</p>
-      <h2 id="contact-title">Contact</h2>
+      <p class="km">km 42.2 <span>finish</span></p>
+      <h2 id="contact-title">Contact <em>Liên hệ</em></h2>
       <p class="intro">Email is the fastest way to reach me.</p>
       <div class="buttons" id="contact-buttons"></div>
+      <p class="thanks">Cảm ơn bạn đã ghé thăm.</p>
     </section>
 
     <noscript>
@@ -120,9 +134,9 @@
     </noscript>
   </main>
 
-  <footer><p>Built by hand with HTML, CSS and JavaScript. Psst: try the Konami code.</p></footer>
+  <footer><p>gg, thanks for stopping by. <span>Psst: press R.</span></p></footer>
 
-  <script src="data/site.js?v=9"></script>
-  <script src="script.js?v=9"></script>
+  <script src="data/site.js?v=12"></script>
+  <script src="script.js?v=12"></script>
 </body>
 </html>

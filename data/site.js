@@ -5,39 +5,15 @@ const SITE = {
   preferredName: "Heidi",
   tagline: "CS and Math student at Gettysburg College building backend and infrastructure software in Go and Python.",
   seeking: "Looking for full-time Software Engineer roles starting May 2027.",
+  // Shown as "At a glance" under the hero.
   sheet: [
-    { k: "Class", v: "Backend and infrastructure" },
-    { k: "Home base", v: "Gettysburg, PA" },
-    { k: "Main weapons", v: "Go, Python" },
-    { k: "Current quest", v: "A full-time SWE role, starting May 2027" },
-    { k: "Status", v: "Looking for a team" }
+    { k: "From", v: "S\u00e0i G\u00f2n (Ho Chi Minh City)" },
+    { k: "Based in", v: "Gettysburg, PA" },
+    { k: "Works in", v: "Go, Python" },
+    { k: "Looking for", v: "A full-time SWE role, starting May 2027" },
+    { k: "Fuel", v: "C\u00e0 ph\u00ea s\u1eefa \u0111\u00e1" }
   ],
-  // What drops in the hero board. Each item is a piece with a label; its color is its category.
-  // Keep every label true to the sections below. Short labels fit on the blocks.
-  dropCategories: [
-    { name: "Languages", col: "I" },
-    { name: "Infrastructure", col: "J" },
-    { name: "Backend", col: "S" },
-    { name: "AI", col: "T" },
-    { name: "Open source", col: "L" },
-    { name: "Projects", col: "O" },
-    { name: "Education", col: "Z" }
-  ],
-  drops: [
-    { label: "Go", cat: "Languages" }, { label: "Python", cat: "Languages" },
-    { label: "Java", cat: "Languages" }, { label: "JS/TS", cat: "Languages" },
-    { label: "Kubernetes", cat: "Infrastructure" }, { label: "Docker", cat: "Infrastructure" },
-    { label: "AWS", cat: "Infrastructure" }, { label: "Linux", cat: "Infrastructure" },
-    { label: "nginx", cat: "Infrastructure" }, { label: "Git", cat: "Infrastructure" },
-    { label: "REST APIs", cat: "Backend" }, { label: "FastAPI", cat: "Backend" },
-    { label: "Prometheus", cat: "Backend" }, { label: "MySQL", cat: "Backend" },
-    { label: "Claude API", cat: "AI" }, { label: "RAG", cat: "AI" },
-    { label: "Multi-agent", cat: "AI" }, { label: "Claude Code", cat: "AI" },
-    { label: "Kerno (1 PR)", cat: "Open source" }, { label: "Tether (3 PRs)", cat: "Open source" },
-    { label: "YouLecture", cat: "Projects" }, { label: "Cancer to Hell", cat: "Projects" },
-    { label: "PicarX robot", cat: "Projects" }, { label: "model-operator (WIP)", cat: "Projects" },
-    { label: "CS + Math", cat: "Education" }, { label: "TA, Calculus I", cat: "Education" }
-  ],
+
   links: {
     github: "https://github.com/huynna12",
     linkedin: "https://linkedin.com/in/heidi-ho-16b875246",
@@ -195,11 +171,12 @@ const SITE = {
     }
   ],
 
-  sideQuests: [
+  outsideWork: [
     { text: "Run a half marathon", done: true },
     { text: "Run a full marathon this year" },
     { text: "Learn sign language" },
     { text: "Travel" },
     { text: "Save the world" }
-  ]
+  ],
+  alwaysOn: "C\u00e0 ph\u00ea s\u1eefa \u0111\u00e1. Long runs. League of Legends."
 };
