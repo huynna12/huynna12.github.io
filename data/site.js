@@ -12,6 +12,32 @@ const SITE = {
     { k: "Current quest", v: "A full-time SWE role, starting May 2027" },
     { k: "Status", v: "Looking for a team" }
   ],
+  // What drops in the hero board. Each item is a piece with a label; its color is its category.
+  // Keep every label true to the sections below. Short labels fit on the blocks.
+  dropCategories: [
+    { name: "Languages", col: "I" },
+    { name: "Infrastructure", col: "J" },
+    { name: "Backend", col: "S" },
+    { name: "AI", col: "T" },
+    { name: "Open source", col: "L" },
+    { name: "Projects", col: "O" },
+    { name: "Education", col: "Z" }
+  ],
+  drops: [
+    { label: "Go", cat: "Languages" }, { label: "Python", cat: "Languages" },
+    { label: "Java", cat: "Languages" }, { label: "JS/TS", cat: "Languages" },
+    { label: "Kubernetes", cat: "Infrastructure" }, { label: "Docker", cat: "Infrastructure" },
+    { label: "AWS", cat: "Infrastructure" }, { label: "Linux", cat: "Infrastructure" },
+    { label: "nginx", cat: "Infrastructure" }, { label: "Git", cat: "Infrastructure" },
+    { label: "REST APIs", cat: "Backend" }, { label: "FastAPI", cat: "Backend" },
+    { label: "Prometheus", cat: "Backend" }, { label: "MySQL", cat: "Backend" },
+    { label: "Claude API", cat: "AI" }, { label: "RAG", cat: "AI" },
+    { label: "Multi-agent", cat: "AI" }, { label: "Claude Code", cat: "AI" },
+    { label: "Kerno (1 PR)", cat: "Open source" }, { label: "Tether (3 PRs)", cat: "Open source" },
+    { label: "YouLecture", cat: "Projects" }, { label: "Cancer to Hell", cat: "Projects" },
+    { label: "PicarX robot", cat: "Projects" }, { label: "model-operator (WIP)", cat: "Projects" },
+    { label: "CS + Math", cat: "Education" }, { label: "TA, Calculus I", cat: "Education" }
+  ],
   links: {
     github: "https://github.com/huynna12",
     linkedin: "https://linkedin.com/in/heidi-ho-16b875246",

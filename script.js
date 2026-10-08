@@ -222,8 +222,9 @@ const col = $('stage-col');
 const hint = $('hint');
 const playBtn = $('play');
 const pad = $('pad');
-const HINT_AUTO = 'It plays itself. Want a go?';
-const HINT_PLAY = '\u2190 \u2192 move \u00b7 \u2191 rotate \u00b7 \u2193 soft drop \u00b7 Space drop \u00b7 Esc hands it back';
+const HINT_AUTO = 'Each block is something I work with. Take over if you like.';
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+const HINT_PLAY = TOUCH ? 'Use the buttons below. Tap Hand it back to let it play itself.' : '\u2190 \u2192 move \u00b7 \u2191 rotate \u00b7 \u2193 soft drop \u00b7 Space drop \u00b7 Esc hands it back';
 const pad2 = (n) => String(n).padStart(2, '0');
 
 const best = {
@@ -231,16 +232,27 @@ const best = {
   set(n) { try { localStorage.setItem('tetris-best', String(n)); } catch (e) {} },
 };
 
+// Color key for the board: one color per category of what drops.
+$('legend').append(...SITE.dropCategories.map((c) =>
+  h('li', null, h('i', { class: 'lg', 'data-c': c.col }), c.name)));
+
 function loadBoard() {
   if (navigator.connection && navigator.connection.saveData) return col.classList.add('nogl');
-  import('./board.js?v=6').then((m) => {
+  import('./board.js?v=9').then((m) => {
     let lastLines = 0;
     const api = m.startBoard({
       canvas: $('board'),
       stage: $('stage'),
-      onStats: (l, p) => { lastLines = l; $('lines').textContent = pad2(l); $('pieces').textContent = pad2(p); },
-      onEvent: (ev, lines) => {
+      tagsEl: $('blocklabels'),
+      items: SITE.drops.map((d) => ({
+        label: d.label,
+        col: (SITE.dropCategories.find((c) => c.name === d.cat) || { col: 'I' }).col,
+      })),
+      onStats: (l) => { lastLines = l; $('lines').textContent = pad2(l); },
+      onEvent: (ev, arg) => {
+        if (ev === 'now') { $('now').textContent = arg.label; return; }
         if (ev !== 'over') return;
+        const lines = arg;
         const b = Math.max(best.get(), lines);
         best.set(b);
         hint.textContent = 'Game over: ' + lines + ' line' + (lines === 1 ? '' : 's') + '. Best: ' + b + '. Starting again.';

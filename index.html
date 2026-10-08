@@ -18,7 +18,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://huynna12.github.io/">
   <link rel="preload" href="fonts/Bricolage.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -43,7 +43,6 @@
       <div class="hero-text">
         <p class="kicker">Hi, I'm <span id="pref"></span></p>
         <h1 id="hero-title"><span id="name"></span></h1>
-        <div class="swatch" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <p class="lead" id="tagline"></p>
         <p class="seeking" id="seeking"></p>
         <div class="buttons" id="hero-buttons"></div>
@@ -51,11 +50,13 @@
       <div class="stage-col" id="stage-col">
         <div class="stage" id="stage" aria-hidden="true">
           <canvas id="board"></canvas>
-          <div class="hud"><span>LINES <b id="lines">00</b></span><span>PIECES <b id="pieces">00</b></span></div>
+          <div class="blk-layer" id="blocklabels"></div>
+          <div class="hud"><span>NOW <b id="now">&nbsp;</b></span><span>LINES <b id="lines">00</b></span></div>
         </div>
+        <ul class="legend" id="legend" aria-label="Color key for the falling blocks"></ul>
         <div class="controls">
           <button class="btn" id="play" type="button" aria-pressed="false" disabled>Take over</button>
-          <p class="hint" id="hint" aria-live="polite">It plays itself. Want a go?</p>
+          <p class="hint" id="hint" aria-live="polite">Each block is something I work with. Take over if you like.</p>
         </div>
         <div class="pad" id="pad" hidden>
           <button type="button" data-act="left" aria-label="Move left">&larr;</button>
@@ -121,7 +122,7 @@
 
   <footer><p>Built by hand with HTML, CSS and JavaScript. Psst: try the Konami code.</p></footer>
 
-  <script src="data/site.js?v=6"></script>
-  <script src="script.js?v=6"></script>
+  <script src="data/site.js?v=9"></script>
+  <script src="script.js?v=9"></script>
 </body>
 </html>

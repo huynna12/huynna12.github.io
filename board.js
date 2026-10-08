@@ -82,9 +82,11 @@ function plan(grid, type) {
 
 /* ---------- Game state ---------- */
 class Game {
-  constructor(onStats, onEvent) {
+  constructor(onStats, onEvent, items) {
     this.onStats = onStats;
     this.onEvent = onEvent;
+    this.items = items && items.length ? items : [{ label: '', col: 'I' }];
+    this.itemIdx = 0;
     this.mode = 'auto';
     this.lines = 0;
     this.pieces = 0;
@@ -99,10 +101,19 @@ class Game {
     this.fade = null;
     this.bag = [];
     this.soft = false;
+    this.labels = new Map();
+    this.seq = 0;
+  }
+
+  nextItem() {
+    const it = this.items[this.itemIdx % this.items.length];
+    this.itemIdx++;
+    return it;
   }
 
   setMode(mode) {
     this.mode = mode;
+    this.itemIdx = 0;
     this.lines = 0;
     this.pieces = 0;
     this.reset();
@@ -137,12 +148,14 @@ class Game {
         this.onEvent && this.onEvent('over', this.lines);
         return;
       }
-      this.cur = { type, ri: 0, human: true, x, row, acc: 0, lock: 0 };
+      this.cur = { type, ri: 0, human: true, x, row, acc: 0, lock: 0, item: this.nextItem() };
+      this.onEvent && this.onEvent('now', this.cur.item);
       return;
     }
     const target = plan(this.grid, type);
     if (!target) { this.fade = { t: 0 }; return; }
-    this.cur = { type, ri: 0, target, x: 3, y: H + 3, tRot: 0, tMove: 0 };
+    this.cur = { type, ri: 0, target, x: 3, y: H + 3, tRot: 0, tMove: 0, item: this.nextItem() };
+    this.onEvent && this.onEvent('now', this.cur.item);
   }
 
   update(dt) {
@@ -179,7 +192,7 @@ class Game {
     const floor = aligned ? p.target.oy : this.maxHeight() + 1;
     p.y = Math.max(p.y - 11 * dt, floor);
     if (aligned && p.y <= p.target.oy) {
-      this.commit(p.type, p.ri, p.target.ox, p.target.oy);
+      this.commit(p.type, p.ri, p.target.ox, p.target.oy, p.item);
       this.cur = null;
       if (this.maxHeight() >= H - 3 && !this.clearing) this.fade = { t: 0 };
     }
@@ -192,7 +205,7 @@ class Game {
     if (hitStrict(this.grid, cells, p.x, p.row - 1)) {
       p.acc = 0;
       p.lock += dt;
-      if (p.lock > 0.45) { this.commit(p.type, p.ri, p.x, p.row); this.cur = null; }
+      if (p.lock > 0.45) { this.commit(p.type, p.ri, p.x, p.row, p.item); this.cur = null; }
     } else {
       p.lock = 0;
       p.acc += (this.soft ? 20 : Math.min(1.8 + this.lines * 0.25, 14)) * dt;
@@ -238,15 +251,19 @@ class Game {
   hardDrop() {
     const p = this.humanPiece();
     if (!p) return;
-    this.commit(p.type, p.ri, p.x, this.landingRow(p));
+    this.commit(p.type, p.ri, p.x, this.landingRow(p), p.item);
     this.cur = null;
   }
 
-  commit(type, ri, ox, oy) {
+  commit(type, ri, ox, oy, item) {
+    const pid = ++this.seq;
+    const info = { label: item.label, col: item.col, cells: [] };
+    this.labels.set(pid, info);
     for (const [cx, cy] of ROTS[type][ri]) {
-      const c = { x: ox + cx, y: oy + cy, vy: oy + cy, type, s: 1 };
+      const c = { x: ox + cx, y: oy + cy, vy: oy + cy, col: item.col, pid, s: 1 };
       this.grid[c.y][c.x] = c;
       this.cells.push(c);
+      info.cells.push(c);
     }
     this.pieces++;
     const rows = [];
@@ -261,6 +278,10 @@ class Game {
   finishClear() {
     const rows = new Set(this.clearing.rows);
     this.cells = this.cells.filter((c) => !rows.has(c.y));
+    for (const [pid, info] of this.labels) {
+      info.cells = info.cells.filter((c) => !rows.has(c.y));
+      if (!info.cells.length) this.labels.delete(pid);
+    }
     for (const c of this.cells) {
       c.y -= this.clearing.rows.filter((r) => r < c.y).length;
     }
@@ -303,7 +324,7 @@ function gridTexture() {
   return t;
 }
 
-export function startBoard({ canvas, stage, onStats, onEvent, onMode }) {
+export function startBoard({ canvas, stage, tagsEl, items, onStats, onEvent, onMode }) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let renderer;
   try {
@@ -375,7 +396,7 @@ export function startBoard({ canvas, stage, onStats, onEvent, onMode }) {
   const pos = new THREE.Vector3();
   const tmp = new THREE.Color();
 
-  const game = new Game(onStats, onEvent);
+  const game = new Game(onStats, onEvent, items);
 
   function put(i, x, y, type, scale, flash) {
     pos.set(x - (W - 1) / 2, y - (H - 1) / 2, 0);
@@ -386,6 +407,58 @@ export function startBoard({ canvas, stage, onStats, onEvent, onMode }) {
     if (flash > 0) tmp.lerp(white, flash);
     else if (flash < 0) tmp.lerp(dim, -flash);
     mesh.setColorAt(i, tmp);
+  }
+
+  // HTML labels that follow each piece, so the text stays crisp.
+  const tagEls = new Map();
+  const v3 = new THREE.Vector3();
+  function placeTag(id, label, col, cx, cy, opacity) {
+    let el = tagEls.get(id);
+    if (!el) {
+      el = document.createElement('span');
+      el.className = 'blk';
+      el.dataset.c = col;
+      el.textContent = label;
+      tagsEl.append(el);
+      tagEls.set(id, el);
+    }
+    v3.set(cx - (W - 1) / 2, cy - (H - 1) / 2, 0.4);
+    group.localToWorld(v3);
+    v3.project(camera);
+    const w = stage.clientWidth, h = stage.clientHeight;
+    el.style.transform = `translate(-50%, -50%) translate(${((v3.x + 1) / 2) * w}px, ${((1 - v3.y) / 2) * h}px)`;
+    // Hide a label while it passes behind the score readout at the top of the board.
+    const py = ((1 - v3.y) / 2) * h;
+    el.style.opacity = py < 40 ? 0 : opacity;
+    el.dataset.seen = '1';
+  }
+  function updateTags(fadeS) {
+    if (!tagsEl) return;
+    group.updateMatrixWorld();
+    for (const el of tagEls.values()) el.dataset.seen = '';
+    for (const [pid, info] of game.labels) {
+      if (info.cells.length < 3) continue;   // skip leftover fragments
+      let sx = 0, sy = 0;
+      for (const c of info.cells) { sx += c.x; sy += c.vy; }
+      placeTag(pid, info.label, info.col, sx / info.cells.length, sy / info.cells.length, fadeS);
+    }
+    const p = game.cur;
+    if (p && p.item) {
+      const cells = ROTS[p.type][p.ri];
+      let sx = 0, sy = 0;
+      for (const [cx, cy] of cells) { sx += cx; sy += cy; }
+      const py = p.human ? p.row - p.acc : p.y;
+      placeTag('cur', p.item.label, p.item.col, p.x + sx / cells.length, py + sy / cells.length, fadeS);
+    }
+    for (const [id, el] of tagEls) {
+      if (!el.dataset.seen) { el.remove(); tagEls.delete(id); }
+    }
+    // The falling piece's tag is replaced when the piece changes.
+    const cur = tagEls.get('cur');
+    if (cur && game.cur && cur.textContent !== game.cur.item.label) {
+      cur.textContent = game.cur.item.label;
+      cur.dataset.c = game.cur.item.col;
+    }
   }
 
   function draw(dt) {
@@ -401,7 +474,7 @@ export function startBoard({ canvas, stage, onStats, onEvent, onMode }) {
         f = 0.5 + 0.5 * Math.sin(flashT * 40);
         s = fadeS * (1 + 0.12 * Math.sin(flashT * 24));
       }
-      put(i++, c.x, c.vy, c.type, s, f);
+      put(i++, c.x, c.vy, c.col, s, f);
     }
     const p = game.cur;
     if (p) {
@@ -409,11 +482,12 @@ export function startBoard({ canvas, stage, onStats, onEvent, onMode }) {
       if (p.human && !game.clearing && !game.fade) {
         const land = game.landingRow(p);
         if (land < p.row - 0.01) {
-          for (const [cx, cy] of ROTS[p.type][p.ri]) put(i++, px + cx, land + cy, p.type, 0.82, -0.62);
+          for (const [cx, cy] of ROTS[p.type][p.ri]) put(i++, px + cx, land + cy, p.item.col, 0.82, -0.62);
         }
       }
-      for (const [cx, cy] of ROTS[p.type][p.ri]) put(i++, px + cx, py + cy, p.type, fadeS, 0);
+      for (const [cx, cy] of ROTS[p.type][p.ri]) put(i++, px + cx, py + cy, p.item.col, fadeS, 0);
     }
+    updateTags(fadeS);
     mesh.count = i;
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
