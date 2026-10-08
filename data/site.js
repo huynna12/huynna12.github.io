@@ -136,6 +136,8 @@ const SITE = {
 
   sideQuests: [
     "Save the world.",
-    "Run a full marathon this year. The half is done."
+    "Run a full marathon this year. The half is done.",
+    "Learn sign language.",
+    "Travel."
   ]
 };
