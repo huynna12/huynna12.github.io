@@ -3,54 +3,95 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Heidi Ho</title>
-  <meta name="description" content="Heidi Ho: CS &amp; Math student, builder of AI systems, runner.">
+  <title>Huynh Ho | Software Engineer</title>
+  <meta name="description" content="Huynh (Heidi) Ho is a CS and Math student at Gettysburg College building backend and infrastructure software in Go and Python. Looking for SWE roles starting May 2027.">
+  <meta property="og:title" content="Huynh Ho | Software Engineer">
+  <meta property="og:description" content="Backend and infrastructure software in Go and Python. Merged pull requests in Kerno and Tether.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://huynna12.github.io/">
+  <meta name="theme-color" content="#14141f">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://huynna12.github.io/">
+  <link rel="preload" href="fonts/PressStart2P.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/JetBrainsMono.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="track" aria-hidden="true"><span class="runner" id="runner"></span></div>
+  <a class="skip" href="#main">Skip to content</a>
 
-  <main>
-    <section id="start">
-      <p class="marker">0 km</p>
-      <h1>Hi, I'm Heidi.</h1>
-      <p class="lead">I build AI systems and robots. When I'm not at my desk, I'm probably running.</p>
-    </section>
-
-    <section id="about">
-      <p class="marker">3 km</p>
-      <h2>About</h2>
-      <p>I'm a senior at Gettysburg College studying Computer Science and Math, with a minor in Data Science. I like AI for education and healthcare, and robots that actually move.</p>
-      <ul class="projects">
-        <li><a href="https://github.com/huynna12/your-lecture-but-better">Your Lecture, But Better</a> turns any YouTube lecture into a study environment with a 5-agent pipeline.</li>
-        <li><a href="https://github.com/huynna12/cancer-to-hell">Cancer to Hell</a> is a multi-agent system, built in Go, that helps patients and oncologists explore treatment options.</li>
-        <li><a href="https://github.com/huynna12/robot-path">Robot Path</a> is a line-following robot written in Python.</li>
+  <header class="hud">
+    <a class="hud-name" href="#top">HUH</a>
+    <nav aria-label="Sections">
+      <ul>
+        <li><a href="#open-source">Open source</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#background">Background</a></li>
+        <li><a href="#contact">Contact</a></li>
       </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <p class="label">Player 1</p>
+      <h1 id="hero-title"><span id="name"></span></h1>
+      <p class="aka">Goes by <strong id="pref"></strong></p>
+      <p class="lead" id="tagline"></p>
+      <p class="seeking" id="seeking"></p>
+      <div class="buttons" id="hero-buttons"></div>
     </section>
 
-    <section id="running">
-      <p class="marker">6 km</p>
-      <h2>Running</h2>
-      <p>I run to cool my head.</p>
-      <dl class="stats">
-        <div><dt>Done</dt><dd>Half marathon</dd></div>
-        <div><dt>This year</dt><dd>Going for a full</dd></div>
-      </dl>
+    <section id="open-source" aria-labelledby="os-title">
+      <p class="label">Level 1</p>
+      <h2 id="os-title">Open source</h2>
+      <p class="intro">Merged pull requests in real projects. Every PR number links to GitHub.</p>
+      <div id="os-list" class="stack"></div>
     </section>
 
-    <section id="contact">
-      <p class="marker">10 km</p>
-      <h2>Say hi</h2>
-      <ul class="links">
-        <li><a href="mailto:honhuhuynh1210@gmail.com">Email</a></li>
-        <li><a href="https://github.com/huynna12">GitHub</a></li>
-        <li><a href="https://www.instagram.com/hnh_naf/">Instagram</a></li>
-        <li><a href="https://www.linkedin.com/in/heidi-ho-16b875246/">LinkedIn</a></li>
-      </ul>
-      <p class="finish">Finish line. Thanks for stopping by.</p>
+    <section id="projects" aria-labelledby="proj-title">
+      <p class="label">Level 2</p>
+      <h2 id="proj-title">Projects</h2>
+      <div id="proj-list" class="grid"></div>
     </section>
+
+    <section id="skills" aria-labelledby="skills-title">
+      <p class="label">Level 3</p>
+      <h2 id="skills-title">Skills</h2>
+      <div id="skills-list" class="grid grid-2"></div>
+    </section>
+
+    <section id="background" aria-labelledby="bg-title">
+      <p class="label">Level 4</p>
+      <h2 id="bg-title">Education and experience</h2>
+      <div id="bg-list" class="stack"></div>
+    </section>
+
+    <section id="currently" aria-labelledby="now-title">
+      <p class="label">Side quests</p>
+      <h2 id="now-title">Currently</h2>
+      <ul id="now-list" class="plain"></ul>
+    </section>
+
+    <section id="contact" aria-labelledby="contact-title">
+      <p class="label">Final level</p>
+      <h2 id="contact-title">Contact</h2>
+      <p class="intro">Email is the fastest way to reach me.</p>
+      <div class="buttons" id="contact-buttons"></div>
+    </section>
+
+    <noscript>
+      <p class="noscript">This page needs JavaScript to show its content. You can find me at
+        <a href="https://github.com/huynna12">GitHub</a>,
+        <a href="https://linkedin.com/in/heidi-ho-16b875246">LinkedIn</a>, or
+        <a href="mailto:honhuhuynh1210@gmail.com">honhuhuynh1210@gmail.com</a>.</p>
+    </noscript>
   </main>
 
+  <footer><p>Built by hand with HTML, CSS and JavaScript.</p></footer>
+
+  <script src="data/site.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
