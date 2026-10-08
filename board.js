@@ -45,6 +45,9 @@ const hit = (occ, cells, ox, oy) => cells.some(([cx, cy]) => {
   return x < 0 || x >= W || y < 0 || (y < H && occ[y][x]);
 });
 
+// Collision for the player's piece: stricter than hit(), nothing may poke above the board.
+const hitStrict = (grid, cells, ox, oy) => hit(grid, cells, ox, oy) || cells.some(([, cy]) => oy + cy >= H);
+
 function plan(grid, type) {
   const occ = grid.map((r) => r.map(Boolean));
   let best = null;
@@ -79,8 +82,10 @@ function plan(grid, type) {
 
 /* ---------- Game state ---------- */
 class Game {
-  constructor(onStats) {
+  constructor(onStats, onEvent) {
     this.onStats = onStats;
+    this.onEvent = onEvent;
+    this.mode = 'auto';
     this.lines = 0;
     this.pieces = 0;
     this.reset();
@@ -93,6 +98,15 @@ class Game {
     this.clearing = null;
     this.fade = null;
     this.bag = [];
+    this.soft = false;
+  }
+
+  setMode(mode) {
+    this.mode = mode;
+    this.lines = 0;
+    this.pieces = 0;
+    this.reset();
+    this.onStats && this.onStats(0, 0);
   }
 
   nextType() {
@@ -113,6 +127,19 @@ class Game {
 
   spawn() {
     const type = this.nextType();
+    if (this.mode === 'human') {
+      const cells = ROTS[type][0];
+      const w = Math.max(...cells.map((c) => c[0])) + 1;
+      const h = Math.max(...cells.map((c) => c[1])) + 1;
+      const x = Math.floor((W - w) / 2), row = H - h;
+      if (hitStrict(this.grid, cells, x, row)) {
+        this.fade = { t: 0 };
+        this.onEvent && this.onEvent('over', this.lines);
+        return;
+      }
+      this.cur = { type, ri: 0, human: true, x, row, acc: 0, lock: 0 };
+      return;
+    }
     const target = plan(this.grid, type);
     if (!target) { this.fade = { t: 0 }; return; }
     this.cur = { type, ri: 0, target, x: 3, y: H + 3, tRot: 0, tMove: 0 };
@@ -121,7 +148,11 @@ class Game {
   update(dt) {
     if (this.fade) {
       this.fade.t += dt;
-      if (this.fade.t > 0.7) this.reset();
+      if (this.fade.t > 0.7) {
+        const human = this.mode === 'human';
+        this.reset();
+        if (human) { this.lines = 0; this.pieces = 0; this.onStats && this.onStats(0, 0); }
+      }
       return;
     }
     if (this.clearing) {
@@ -130,6 +161,7 @@ class Game {
       return;
     }
     if (!this.cur) { this.spawn(); return; }
+    if (this.cur.human) { this.updateHuman(dt); return; }
 
     const p = this.cur;
     const rots = ROTS[p.type];
@@ -146,26 +178,82 @@ class Game {
     const aligned = p.ri === p.target.ri && p.x === p.target.ox;
     const floor = aligned ? p.target.oy : this.maxHeight() + 1;
     p.y = Math.max(p.y - 11 * dt, floor);
-    if (aligned && p.y <= p.target.oy) this.lock();
+    if (aligned && p.y <= p.target.oy) {
+      this.commit(p.type, p.ri, p.target.ox, p.target.oy);
+      this.cur = null;
+      if (this.maxHeight() >= H - 3 && !this.clearing) this.fade = { t: 0 };
+    }
   }
 
-  lock() {
+  /* Human control */
+  updateHuman(dt) {
     const p = this.cur;
     const cells = ROTS[p.type][p.ri];
-    for (const [cx, cy] of cells) {
-      const c = { x: p.target.ox + cx, y: p.target.oy + cy, vy: p.target.oy + cy, type: p.type, s: 1 };
+    if (hitStrict(this.grid, cells, p.x, p.row - 1)) {
+      p.acc = 0;
+      p.lock += dt;
+      if (p.lock > 0.45) { this.commit(p.type, p.ri, p.x, p.row); this.cur = null; }
+    } else {
+      p.lock = 0;
+      p.acc += (this.soft ? 20 : Math.min(1.8 + this.lines * 0.25, 14)) * dt;
+      while (p.acc >= 1) {
+        if (hitStrict(this.grid, cells, p.x, p.row - 1)) { p.acc = 0; break; }
+        p.row--;
+        p.acc -= 1;
+      }
+    }
+  }
+
+  humanPiece() {
+    return this.cur && this.cur.human && !this.clearing && !this.fade ? this.cur : null;
+  }
+
+  move(dx) {
+    const p = this.humanPiece();
+    if (p && !hitStrict(this.grid, ROTS[p.type][p.ri], p.x + dx, p.row)) { p.x += dx; p.lock = 0; }
+  }
+
+  rotatePiece() {
+    const p = this.humanPiece();
+    if (!p) return;
+    const rots = ROTS[p.type];
+    const ni = (p.ri + 1) % rots.length;
+    for (const dy of [0, -1, -2]) {
+      for (const k of [0, -1, 1, -2, 2]) {
+        if (!hitStrict(this.grid, rots[ni], p.x + k, p.row + dy)) {
+          p.ri = ni; p.x += k; p.row += dy; p.acc = 0; p.lock = 0;
+          return;
+        }
+      }
+    }
+  }
+
+  landingRow(p) {
+    const cells = ROTS[p.type][p.ri];
+    let r = p.row;
+    while (!hitStrict(this.grid, cells, p.x, r - 1)) r--;
+    return r;
+  }
+
+  hardDrop() {
+    const p = this.humanPiece();
+    if (!p) return;
+    this.commit(p.type, p.ri, p.x, this.landingRow(p));
+    this.cur = null;
+  }
+
+  commit(type, ri, ox, oy) {
+    for (const [cx, cy] of ROTS[type][ri]) {
+      const c = { x: ox + cx, y: oy + cy, vy: oy + cy, type, s: 1 };
       this.grid[c.y][c.x] = c;
       this.cells.push(c);
     }
-    this.cur = null;
     this.pieces++;
     const rows = [];
     for (let y = 0; y < H; y++) if (this.grid[y].every(Boolean)) rows.push(y);
     if (rows.length) {
       this.clearing = { rows, t: 0 };
       this.lines += rows.length;
-    } else if (this.maxHeight() >= H - 3) {
-      this.fade = { t: 0 };
     }
     this.onStats && this.onStats(this.lines, this.pieces);
   }
@@ -215,7 +303,7 @@ function gridTexture() {
   return t;
 }
 
-export function startBoard({ canvas, stage, onStats }) {
+export function startBoard({ canvas, stage, onStats, onEvent, onMode }) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let renderer;
   try {
@@ -280,13 +368,14 @@ export function startBoard({ canvas, stage, onStats }) {
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   const white = new THREE.Color(1, 1, 1);
+  const dim = new THREE.Color(0x0b0d1a);
   const m = new THREE.Matrix4();
   const q = new THREE.Quaternion();
   const sc = new THREE.Vector3();
   const pos = new THREE.Vector3();
   const tmp = new THREE.Color();
 
-  const game = new Game(onStats);
+  const game = new Game(onStats, onEvent);
 
   function put(i, x, y, type, scale, flash) {
     pos.set(x - (W - 1) / 2, y - (H - 1) / 2, 0);
@@ -294,7 +383,8 @@ export function startBoard({ canvas, stage, onStats }) {
     m.compose(pos, q, sc);
     mesh.setMatrixAt(i, m);
     tmp.copy(colors[type]);
-    if (flash) tmp.lerp(white, flash);
+    if (flash > 0) tmp.lerp(white, flash);
+    else if (flash < 0) tmp.lerp(dim, -flash);
     mesh.setColorAt(i, tmp);
   }
 
@@ -315,7 +405,14 @@ export function startBoard({ canvas, stage, onStats }) {
     }
     const p = game.cur;
     if (p) {
-      for (const [cx, cy] of ROTS[p.type][p.ri]) put(i++, p.x + cx, p.y + cy, p.type, 1, 0);
+      const px = p.x, py = p.human ? p.row - p.acc : p.y;
+      if (p.human && !game.clearing && !game.fade) {
+        const land = game.landingRow(p);
+        if (land < p.row - 0.01) {
+          for (const [cx, cy] of ROTS[p.type][p.ri]) put(i++, px + cx, land + cy, p.type, 0.82, -0.62);
+        }
+      }
+      for (const [cx, cy] of ROTS[p.type][p.ri]) put(i++, px + cx, py + cy, p.type, fadeS, 0);
     }
     mesh.count = i;
     mesh.instanceMatrix.needsUpdate = true;
@@ -348,28 +445,83 @@ export function startBoard({ canvas, stage, onStats }) {
   }
   group.rotation.set(-0.08, -0.2, 0);
 
-  if (reduced) {
-    // Show a settled board without animating.
-    for (let n = 0; n < 2600; n++) game.update(1 / 60);
-    draw(0);
-    return true;
-  }
-
-  let visible = true, last = performance.now();
+  let human = false, raf = 0, visible = true, last = performance.now();
   new IntersectionObserver((e) => { visible = e[0].isIntersecting; }).observe(stage);
-  (function loop(now) {
-    requestAnimationFrame(loop);
+
+  const shouldRun = () => !reduced || human;
+  function tick(now) {
+    raf = 0;
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
-    if (!visible) return;
-    group.rotation.y += (-0.2 + tx * 0.32 - group.rotation.y) * 0.06;
-    group.rotation.x += (-0.08 + ty * 0.12 - group.rotation.x) * 0.06;
-    game.update(dt);
-    draw(dt);
-  })(last);
+    if (visible) {
+      if (!reduced) {
+        group.rotation.y += (-0.2 + tx * 0.32 - group.rotation.y) * 0.06;
+        group.rotation.x += (-0.08 + ty * 0.12 - group.rotation.x) * 0.06;
+      }
+      game.update(dt);
+      draw(dt);
+    }
+    if (shouldRun()) raf = requestAnimationFrame(tick);
+  }
+  function start() {
+    if (!raf && shouldRun()) { last = performance.now(); raf = requestAnimationFrame(tick); }
+  }
+
+  function settle() {
+    for (let n = 0; n < 2600; n++) game.update(1 / 60);
+    draw(0);
+  }
+
+  // Keyboard control while the player has the board.
+  const down = (e) => {
+    if (!human) return;
+    const k = e.key;
+    let used = true;
+    if (k === 'ArrowLeft') game.move(-1);
+    else if (k === 'ArrowRight') game.move(1);
+    else if (k === 'ArrowUp' || k === 'x' || k === 'X') game.rotatePiece();
+    else if (k === 'ArrowDown') game.soft = true;
+    else if (k === ' ' || k === 'Spacebar') { if (!e.repeat) game.hardDrop(); }
+    else if (k === 'Escape') setHuman(false);
+    else used = false;
+    if (used) e.preventDefault();
+  };
+  const up = (e) => {
+    if (!human) return;
+    if (e.key === 'ArrowDown') game.soft = false;
+    if (e.key === ' ' || e.key === 'Spacebar') e.preventDefault();
+  };
+  addEventListener('keydown', down);
+  addEventListener('keyup', up);
+
+  function setHuman(on) {
+    if (on === human) return human;
+    human = on;
+    game.setMode(on ? 'human' : 'auto');
+    if (!on) game.soft = false;
+    if (reduced && !on) settle();
+    start();
+    onMode && onMode(human);
+    return human;
+  }
+
+  // Touch pad and other callers.
+  function act(name) {
+    if (!human) return;
+    if (name === 'left') game.move(-1);
+    else if (name === 'right') game.move(1);
+    else if (name === 'rotate') game.rotatePiece();
+    else if (name === 'drop') game.hardDrop();
+    else if (name === 'soft-on') game.soft = true;
+    else if (name === 'soft-off') game.soft = false;
+  }
+
+  if (reduced) settle();
+  else start();
 
   // Fast-forward helper for screenshots: /?board=40 simulates 40 seconds first.
   const ff = Number(new URLSearchParams(location.search).get('board'));
   if (ff > 0) for (let n = 0; n < ff * 60; n++) game.update(1 / 60);
-  return true;
+
+  return { toggle: () => setHuman(!human), setHuman, act, get human() { return human; } };
 }

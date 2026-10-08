@@ -18,7 +18,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://huynna12.github.io/">
   <link rel="preload" href="fonts/Bricolage.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -48,9 +48,22 @@
         <p class="seeking" id="seeking"></p>
         <div class="buttons" id="hero-buttons"></div>
       </div>
-      <div class="stage" id="stage" aria-hidden="true">
-        <canvas id="board"></canvas>
-        <div class="hud"><span>LINES <b id="lines">00</b></span><span>PIECES <b id="pieces">00</b></span></div>
+      <div class="stage-col" id="stage-col">
+        <div class="stage" id="stage" aria-hidden="true">
+          <canvas id="board"></canvas>
+          <div class="hud"><span>LINES <b id="lines">00</b></span><span>PIECES <b id="pieces">00</b></span></div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="play" type="button" aria-pressed="false" disabled>Take over</button>
+          <p class="hint" id="hint" aria-live="polite">It plays itself. Want a go?</p>
+        </div>
+        <div class="pad" id="pad" hidden>
+          <button type="button" data-act="left" aria-label="Move left">&larr;</button>
+          <button type="button" data-act="rotate" aria-label="Rotate">&#8635;</button>
+          <button type="button" data-act="right" aria-label="Move right">&rarr;</button>
+          <button type="button" data-act="soft" aria-label="Soft drop">&darr;</button>
+          <button type="button" data-act="drop" aria-label="Hard drop">Drop</button>
+        </div>
       </div>
     </section>
 
@@ -108,7 +121,7 @@
 
   <footer><p>Built by hand with HTML, CSS and JavaScript. Psst: try the Konami code.</p></footer>
 
-  <script src="data/site.js?v=5"></script>
-  <script src="script.js?v=5"></script>
+  <script src="data/site.js?v=6"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>

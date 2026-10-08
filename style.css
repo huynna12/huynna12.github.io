@@ -116,9 +116,10 @@ p { margin: 0 0 0.8rem; }
 .seeking { color: var(--muted); margin-bottom: 1.6rem; }
 
 /* 3D board */
+.stage-col { width: 100%; max-width: 21rem; justify-self: center; }
 .stage {
-  position: relative; width: 100%; max-width: 21rem; aspect-ratio: 10 / 14;
-  justify-self: center; border-radius: 20px; overflow: hidden;
+  position: relative; width: 100%; aspect-ratio: 10 / 14;
+  border-radius: 20px; overflow: hidden;
   background: radial-gradient(120% 90% at 50% 0%, #1b2150 0%, #0b0d1a 70%);
   box-shadow: 0 30px 60px -28px rgba(30, 50, 160, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
@@ -127,7 +128,7 @@ p { margin: 0 0 0.8rem; }
 .hud b { color: #ffffff; font-weight: 500; margin-left: 0.3rem; }
 @media (min-width: 52rem) {
   .hero { grid-template-columns: 1.3fr 1fr; gap: 3rem; }
-  .stage { justify-self: end; }
+  .stage-col { justify-self: end; }
 }
 
 /* Character sheet strip */
@@ -245,5 +246,44 @@ footer { max-width: var(--max); margin: 5rem auto 0; padding: 1.5rem 1.25rem 3re
 }
 
 /* If WebGL is unavailable, drop the board and let the text use the full width. */
-.stage.nogl { display: none; }
-.hero:has(.stage.nogl) { grid-template-columns: 1fr; }
+.stage-col.nogl { display: none; }
+.hero:has(.stage-col.nogl) { grid-template-columns: 1fr; }
+
+/* Playing the board */
+.stage { transition: box-shadow 0.2s; }
+.stage.playing { box-shadow: 0 0 0 3px var(--c-S), 0 30px 60px -28px rgba(52, 208, 88, 0.5); }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem; margin-top: 1.1rem; }
+.controls .btn:disabled { opacity: 0.5; cursor: wait; box-shadow: none; }
+.hint { flex: 1 1 10rem; margin: 0; font: 0.74rem/1.45 var(--mono); color: var(--muted); }
+.pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; margin-top: 0.8rem; }
+.pad[hidden] { display: none; }
+.pad button {
+  font: 600 1rem var(--sans); padding: 0.7rem 0; color: var(--fg); background: var(--panel);
+  border: 2px solid var(--fg); border-radius: 10px; box-shadow: 0 3px 0 var(--fg);
+  touch-action: manipulation; user-select: none; -webkit-user-select: none; cursor: pointer;
+}
+.pad button:active { transform: translateY(3px); box-shadow: none; }
+.pad button[data-act="drop"] { font-size: 0.8rem; }
+
+/* 3D section pieces: CSS cubes, no WebGL */
+.p3 {
+  --s: 0.95rem; --pc: var(--c-T);
+  position: relative; display: inline-block; flex: none;
+  width: calc(var(--w) * var(--s)); height: calc(var(--h) * var(--s));
+  perspective: 12rem; margin-right: 0.35rem;
+}
+.p3-spin { position: absolute; inset: 0; transform-style: preserve-3d; animation: p3spin 9s linear infinite; animation-delay: var(--d, 0s); }
+.cube { position: absolute; left: calc(var(--x) * var(--s)); top: calc(var(--y) * var(--s)); width: var(--s); height: var(--s); transform-style: preserve-3d; }
+.cube i { position: absolute; inset: 0; background: var(--pc); border: 1px solid rgba(0, 0, 0, 0.28); border-radius: 2px; backface-visibility: hidden; }
+.cube .f { transform: translateZ(calc(var(--s) / 2)); }
+.cube .k { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); filter: brightness(0.6); }
+.cube .r { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); filter: brightness(0.8); }
+.cube .l { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); filter: brightness(0.8); }
+.cube .t { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); filter: brightness(1.25); }
+.cube .b { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); filter: brightness(0.65); }
+.pc3-I { --pc: var(--c-I); } .pc3-O { --pc: var(--c-O); } .pc3-T { --pc: var(--c-T); } .pc3-S { --pc: var(--c-S); }
+.pc3-Z { --pc: var(--c-Z); } .pc3-J { --pc: var(--c-J); } .pc3-L { --pc: var(--c-L); }
+@keyframes p3spin { from { transform: rotateX(-22deg) rotateY(0deg); } to { transform: rotateX(-22deg) rotateY(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .p3-spin { animation: none; transform: rotateX(-22deg) rotateY(-28deg); }
+}

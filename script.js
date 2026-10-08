@@ -54,6 +54,17 @@ function piece(type, size = 0.8) {
   return svg;
 }
 
+// A small spinning 3D piece built from CSS cubes (no WebGL needed).
+function piece3d(type, delay = 0) {
+  const cells = PIECES[type];
+  const w = Math.max(...cells.map((c) => c[0])) + 1;
+  const hgt = Math.max(...cells.map((c) => c[1])) + 1;
+  return h('span', { class: `p3 pc3-${type}`, style: `--w:${w};--h:${hgt};--d:${delay}s`, 'aria-hidden': 'true' },
+    h('span', { class: 'p3-spin' },
+      cells.map(([x, y]) => h('span', { class: 'cube', style: `--x:${x};--y:${hgt - 1 - y}` },
+        ['f', 'k', 'r', 'l', 't', 'b'].map((c) => h('i', { class: c }))))));
+}
+
 function flow(d) {
   const stepEl = (s) => s.parallel
     ? h('div', { class: 'par' }, s.parallel.map((x) => h('span', { class: 'step' }, x)))
@@ -103,7 +114,7 @@ $('tagline').textContent = SITE.tagline;
 $('seeking').textContent = SITE.seeking;
 $('sheet').append(...SITE.sheet.map((r) => h('div', null, h('dt', null, r.k), h('dd', null, r.v))));
 $('logo').append(piece('T', 0.45));
-document.querySelectorAll('.num[data-piece]').forEach((n) => n.prepend(piece(n.dataset.piece, 0.55)));
+document.querySelectorAll('.num[data-piece]').forEach((n, i) => n.prepend(piece3d(n.dataset.piece, -i * 1.3)));
 buttons($('hero-buttons'), true);
 buttons($('contact-buttons'), false);
 
@@ -207,17 +218,65 @@ addEventListener('keydown', (e) => {
 });
 
 // The 3D board loads after the page is ready so it never blocks first paint.
+const col = $('stage-col');
+const hint = $('hint');
+const playBtn = $('play');
+const pad = $('pad');
+const HINT_AUTO = 'It plays itself. Want a go?';
+const HINT_PLAY = '\u2190 \u2192 move \u00b7 \u2191 rotate \u00b7 \u2193 soft drop \u00b7 Space drop \u00b7 Esc hands it back';
+const pad2 = (n) => String(n).padStart(2, '0');
+
+const best = {
+  get() { try { return Number(localStorage.getItem('tetris-best')) || 0; } catch (e) { return 0; } },
+  set(n) { try { localStorage.setItem('tetris-best', String(n)); } catch (e) {} },
+};
+
 function loadBoard() {
-  if (navigator.connection && navigator.connection.saveData) return $('stage').classList.add('nogl');
-  import('./board.js?v=5').then((m) => {
-    const pad = (n) => String(n).padStart(2, '0');
-    const ok = m.startBoard({
+  if (navigator.connection && navigator.connection.saveData) return col.classList.add('nogl');
+  import('./board.js?v=6').then((m) => {
+    let lastLines = 0;
+    const api = m.startBoard({
       canvas: $('board'),
       stage: $('stage'),
-      onStats: (l, p) => { $('lines').textContent = pad(l); $('pieces').textContent = pad(p); },
+      onStats: (l, p) => { lastLines = l; $('lines').textContent = pad2(l); $('pieces').textContent = pad2(p); },
+      onEvent: (ev, lines) => {
+        if (ev !== 'over') return;
+        const b = Math.max(best.get(), lines);
+        best.set(b);
+        hint.textContent = 'Game over: ' + lines + ' line' + (lines === 1 ? '' : 's') + '. Best: ' + b + '. Starting again.';
+        setTimeout(() => { if (api.human) hint.textContent = HINT_PLAY; }, 2600);
+      },
+      onMode: (human) => {
+        playBtn.textContent = human ? 'Hand it back' : 'Take over';
+        playBtn.setAttribute('aria-pressed', String(human));
+        $('stage').classList.toggle('playing', human);
+        pad.hidden = !human;
+        hint.textContent = human ? HINT_PLAY : HINT_AUTO;
+        if (human) {
+          const b = best.get();
+          if (b) hint.textContent = HINT_PLAY + ' Best: ' + b + '.';
+          playBtn.blur();
+        }
+      },
     });
-    if (!ok) $('stage').classList.add('nogl');
-  }).catch((e) => { $('stage').dataset.err = String(e && e.message || e).slice(0, 160); $('stage').classList.add('nogl'); });
+    if (!api) return col.classList.add('nogl');
+    playBtn.disabled = false;
+    playBtn.addEventListener('click', () => api.toggle());
+
+    // On-screen pad: hold left, right and down to repeat.
+    pad.querySelectorAll('button').forEach((b) => {
+      const act = b.dataset.act;
+      let t1 = 0, t2 = 0;
+      const stop = () => { clearTimeout(t1); clearInterval(t2); if (act === 'soft') api.act('soft-off'); };
+      b.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (act === 'soft') return api.act('soft-on');
+        api.act(act);
+        if (act === 'left' || act === 'right') t1 = setTimeout(() => { t2 = setInterval(() => api.act(act), 70); }, 260);
+      });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => b.addEventListener(ev, stop));
+    });
+  }).catch((e) => { col.dataset.err = String((e && e.message) || e).slice(0, 160); col.classList.add('nogl'); });
 }
 if (document.readyState === 'complete') setTimeout(loadBoard, 0);
 else addEventListener('load', () => (window.requestIdleCallback ? requestIdleCallback(loadBoard, { timeout: 1500 }) : setTimeout(loadBoard, 300)));
