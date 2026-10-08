@@ -9,7 +9,6 @@ const SITE = {
     github: "https://github.com/huynna12",
     linkedin: "https://linkedin.com/in/heidi-ho-16b875246",
     email: "honhuhuynh1210@gmail.com",
-    // TODO: drop Huynh_Ho_Resume.pdf into the site root. The button stays disabled until it exists.
     resume: "Huynh_Ho_Resume.pdf"
   },
 
@@ -118,7 +117,7 @@ const SITE = {
     {
       role: "Open Source Contributor",
       where: "Kerno and Tether",
-      when: "",
+      when: "Apr 2026 to present",
       text: "Merged pull requests in Go and Kubernetes tooling. Details above."
     },
     {
