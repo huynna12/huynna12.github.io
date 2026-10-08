@@ -22,6 +22,26 @@ function bullets(list) {
   return list.length ? h('ul', { class: 'bullets' }, list.map((b) => h('li', null, b))) : null;
 }
 
+
+// Small flow diagram: rows of steps, with optional parallel groups.
+function flow(d) {
+  const stepEl = (s) => s.parallel
+    ? h('div', { class: 'par' }, s.parallel.map((x) => h('span', { class: 'step' }, x)))
+    : h('span', { class: 'step' }, s);
+  return h('div', { class: 'flow' },
+    h('p', { class: 'flow-title' }, d.title),
+    d.rows.map((r) =>
+      h('div', { class: 'flow-row' },
+        r.label ? h('span', { class: 'flow-label' }, r.label) : null,
+        h('ol', null, r.steps.map((s) => h('li', null, stepEl(s)))))));
+}
+
+function shot(s) {
+  return h('a', { class: 'shot', href: s.url, target: '_blank', rel: 'noopener' },
+    h('img', { src: s.src, alt: s.alt, width: s.w, height: s.h, loading: 'lazy' }),
+    h('span', null, s.caption + ' (runs over HTTP)'));
+}
+
 function buttons(target, withResume) {
   const L = SITE.links;
   const row = [
@@ -73,18 +93,21 @@ $('os-list').append(...SITE.openSource.map((o) => {
   return h('article', { class: 'card' }, header,
     o.summary ? h('p', { class: 'mono' }, o.summary) : null,
     h('ul', { class: 'prs' }, o.prs.map((p) => h('li', null, badge(p)))),
-    bullets(o.bullets));
+    bullets(o.bullets),
+    o.diagram ? flow(o.diagram) : null);
 }));
 
 // Projects
 $('proj-list').append(...SITE.projects.map((p) =>
   h('article', { class: 'card' },
+    p.shot ? shot(p.shot) : null,
     h('header', null,
       h('h3', null, p.name),
       p.status ? h('span', { class: 'status' }, p.status) : null),
     h('p', null, p.purpose),
     h('ul', { class: 'tags', 'aria-label': 'Technologies' }, p.tags.map((t) => h('li', null, t))),
     bullets(p.bullets),
+    p.diagram ? flow(p.diagram) : null,
     p.links.length
       ? h('p', { class: 'links' }, p.links.map((l) =>
           h('span', null, ext(l.label, l.url, 'plain'), l.note ? h('small', null, ' (' + l.note + ')') : null)))

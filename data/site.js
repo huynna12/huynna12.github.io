@@ -21,6 +21,14 @@ const SITE = {
         { number: 110, url: "https://github.com/optiqor/kerno/pull/110", merged: "Jun 4, 2026" }
       ],
       summary: "feat(adapter): replace kubelet HTTP polling with SharedIndexInformer",
+      diagram: {
+        title: "How the fix works",
+        rows: [
+          { label: "Before", steps: ["Poll kubelet over HTTP", "Pod tracking silently stops on GKE and EKS"] },
+          { label: "After", steps: ["SharedIndexInformer (local node only)", "Two in-memory indexes", "O(1) pod lookups"] },
+          { label: "On failure", steps: ["API server error", "Exponential backoff, 1s to 2 min", "Keep stale entries, degraded mode"] }
+        ]
+      },
       bullets: [
         "Replaced kubelet HTTP polling with a Kubernetes SharedIndexInformer scoped to the local node. This fixed pod tracking that silently stopped on GKE and EKS clusters after startup.",
         "Added two in-memory indexes, which cut pod lookups from O(n) to O(1).",
@@ -65,6 +73,13 @@ const SITE = {
     {
       name: "YouLecture: AI Study Environment",
       purpose: "Turns a YouTube URL into an outline, summaries, and flashcards.",
+      shot: { src: "assets/youlecture.png", alt: "Screenshot of the YouLecture home page with a box to paste a YouTube lecture URL.", w: 960, h: 600, url: "http://3.217.194.27", caption: "The live app. Open it to try it." },
+      diagram: {
+        title: "How it works",
+        rows: [
+          { steps: ["YouTube URL", "Transcript (cached)", "5-agent RAG pipeline (slow stages run in parallel)", "Outline, summaries, flashcards"] }
+        ]
+      },
       tags: ["Python", "FastAPI", "Claude API", "Next.js", "AWS", "Docker", "nginx"],
       bullets: [
         "A 5-agent RAG pipeline. Deployed on AWS Lightsail with Docker and nginx.",
@@ -79,6 +94,13 @@ const SITE = {
     {
       name: "Cancer to Hell: Clinical Research Tool",
       purpose: "Helps patients and oncologists explore treatment evidence.",
+      shot: { src: "assets/cancer-to-hell.png", alt: "Screenshot of the Cancer to Hell patient profile form.", w: 960, h: 600, url: "http://3.217.194.27:8090", caption: "The live app. Synthetic patient data only." },
+      diagram: {
+        title: "How it works",
+        rows: [
+          { steps: ["Patient profile", { parallel: ["Evidence agent", "Guideline agent", "Risk agent"] }, "Citation check against live PubMed", "Results stream to the browser (SSE)"] }
+        ]
+      },
       tags: ["Go", "Anthropic Claude", "PubMed", "Next.js", "SSE", "Docker Compose", "AWS"],
       bullets: [
         "Three LLM agents (evidence, guideline, risk) run concurrently as Go goroutines and stream results over server-sent events.",
@@ -93,6 +115,12 @@ const SITE = {
     {
       name: "Line-Following Robot (PicarX)",
       purpose: "A small robot that follows a line using grayscale sensors. 2025.",
+      diagram: {
+        title: "How it works",
+        rows: [
+          { steps: ["Read grayscale sensors", "Follow the line", "Line lost: recovery logic", "Find the line again"] }
+        ]
+      },
       tags: ["Python", "Grayscale sensors", "State machine"],
       bullets: [
         "Led a student team.",

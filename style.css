@@ -173,7 +173,6 @@ footer { max-width: var(--max); margin: 4rem auto 0; padding: 1.5rem 1rem 3rem; 
 
 @media (min-width: 40rem) {
   .grid-2 { grid-template-columns: 1fr 1fr; }
-  #proj-list { grid-template-columns: 1fr 1fr; }
   .card { padding: 1.5rem 1.5rem 1rem; }
 }
 
@@ -190,3 +189,29 @@ footer { max-width: var(--max); margin: 4rem auto 0; padding: 1.5rem 1rem 3rem; 
 .pr-rows { list-style: none; padding: 0; margin: 0.5rem 0 0.25rem; }
 .pr-rows li { border-top: 2px dashed var(--muted); padding: 0.9rem 0 0.4rem; }
 .pr-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+
+/* Screenshots */
+.shot { display: block; margin: -1.25rem -1.25rem 1rem; text-decoration: none; border-bottom: 2px solid var(--line); }
+.shot img { display: block; width: 100%; height: auto; aspect-ratio: 8 / 5; object-fit: cover; object-position: top; background: var(--bg); }
+.shot span { display: block; padding: 0.4rem 1.25rem; font: 0.75rem var(--mono); color: var(--muted); background: var(--bg); }
+.shot:hover span { color: var(--accent); }
+@media (min-width: 40rem) { .shot { margin: -1.5rem -1.5rem 1rem; } .shot span { padding: 0.4rem 1.5rem; } }
+
+/* Flow diagrams */
+.flow { margin: 0.75rem 0 1rem; padding: 0.75rem; border: 2px dashed var(--muted); background: var(--bg); }
+.flow-title { font: 0.55rem var(--pixel); color: var(--accent); text-transform: uppercase; margin: 0 0 0.6rem; }
+.flow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; margin-bottom: 0.5rem; }
+.flow-label { font: 0.7rem var(--mono); color: var(--muted); min-width: 4.5rem; }
+.flow ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0; margin: 0; padding: 0; }
+.flow li { display: flex; align-items: center; }
+.flow li + li::before { content: ">"; font: 0.8rem var(--pixel); color: var(--accent); padding: 0 0.45rem; }
+.step { display: block; font: 0.75rem/1.35 var(--mono); border: 2px solid var(--line); background: var(--panel); padding: 0.3rem 0.5rem; }
+.par { display: flex; flex-direction: column; gap: 0.3rem; }
+@media (max-width: 40rem) {
+  .flow ol { flex-direction: column; align-items: stretch; gap: 0; }
+  .flow li { flex-direction: column; align-items: stretch; }
+  .flow li + li::before { content: "v"; text-align: center; padding: 0.15rem 0; }
+}
+
+.shot img { aspect-ratio: 16 / 7; }
+@media (max-width: 40rem) { .shot img { aspect-ratio: 8 / 5; } }
