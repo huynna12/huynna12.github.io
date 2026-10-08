@@ -108,8 +108,8 @@ $('bg-list').append(
       h('p', { class: 'muted' }, [x.where, x.when].filter(Boolean).join(' | ')),
       h('p', null, x.text))));
 
-// Currently
-$('now-list').append(...SITE.currently.map((c) => h('li', null, c)));
+// Side quests
+$('now-list').append(...SITE.sideQuests.map((c) => h('li', null, c)));
 
 // Highlight the current section in the nav
 const links = [...document.querySelectorAll('.hud nav a')];

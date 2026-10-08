@@ -134,10 +134,8 @@ const SITE = {
     }
   ],
 
-  currently: [
-    "Building model-operator, a Go Kubernetes controller.",
-    "Learning Java and Spring Boot.",
-    "Preparing for the AWS Developer Associate certification (not yet taken).",
-    "Practicing LeetCode for interviews."
+  sideQuests: [
+    "Save the world.",
+    "Run a full marathon this year. The half is done."
   ]
 };
