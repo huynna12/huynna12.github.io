@@ -13,21 +13,26 @@ const innerR = (y) => RI(y) - 0.03;
 const MILK_TOP = 2.6;
 const COFFEE_TOP = 8.8;
 
-// Dark coffee with a caramel blend at the bottom, scattered with flag-coloured dots (like the stamp art).
-function polkaTexture() {
+// Flag-coloured dots on a transparent canvas. They are drawn on a shell inside the glass wall,
+// so the pattern shows whether or not there is any coffee behind it.
+function dotsTexture() {
   const W = 512, H = 256;
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   const g = c.getContext('2d');
-  g.fillStyle = '#3b2417'; g.fillRect(0, 0, W, H);
-  const gr = g.createLinearGradient(0, H * 0.66, 0, H);
-  gr.addColorStop(0, 'rgba(201,161,95,0)'); gr.addColorStop(1, 'rgba(201,161,95,1)');
-  g.fillStyle = gr; g.fillRect(0, H * 0.66, W, H * 0.34);
   const cols = ['#d8352b', '#2a5bb8', '#f1be2d', '#fff4e0'];
-  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const dots = [];
-  for (let i = 0; i < 17; i++) dots.push([rnd() * W, 14 + rnd() * (H * 0.6), 11 + rnd() * 24, cols[i % 4]]);
-  for (const [x, y, r, col] of dots) {
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const placed = [];
+  for (let n = 0; n < 400 && placed.length < 15; n++) {
+    const r = 15 + rnd() * 24, x = rnd() * W, y = r + 6 + rnd() * (H - 2 * r - 12);
+    let ok = true;
+    for (const p of placed) {
+      let dx = Math.abs(p[0] - x); dx = Math.min(dx, W - dx);
+      if (Math.hypot(dx, p[1] - y) < p[2] + r + 10) { ok = false; break; }
+    }
+    if (ok) placed.push([x, y, r, cols[placed.length % 4]]);
+  }
+  for (const [x, y, r, col] of placed) {
     g.fillStyle = col;
     for (const dx of [-W, 0, W]) { g.beginPath(); g.arc(x + dx, y, r, 0, Math.PI * 2); g.fill(); }
   }
@@ -75,11 +80,15 @@ function sharedParts() {
   const iceGeo = new THREE.ExtrudeGeometry(s, { depth: 0.9, bevelEnabled: true, bevelThickness: 0.16, bevelSize: 0.12, bevelSegments: 3, curveSegments: 6 });
   iceGeo.translate(0, 0, -0.45);
 
+  const shellPts = [];
+  for (let i = 0; i <= 14; i++) { const y = 0.35 + ((GLASS_H - 0.4) * i) / 14; shellPts.push(new THREE.Vector2(RO(y) - 0.1, y)); }
+  const shellGeo = new THREE.LatheGeometry(shellPts, 48);
+
   shared = {
-    glassGeo, milkGeo, layeredGeo, mixedGeo, iceGeo,
+    shellGeo, glassGeo, milkGeo, layeredGeo, mixedGeo, iceGeo,
     glassMat: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.2, envMapIntensity: 1.5, side: THREE.DoubleSide, depthWrite: false }),
     milkMat: new THREE.MeshStandardMaterial({ color: 0xf4e6a8, roughness: 0.5 }),
-    polka: polkaTexture(),
+    dotsMat: new THREE.MeshStandardMaterial({ map: dotsTexture(), alphaTest: 0.5, roughness: 0.35, envMapIntensity: 0.9, side: THREE.DoubleSide }),
     iceMat: new THREE.MeshStandardMaterial({ color: 0xe3eef6, roughness: 0.1, transparent: true, opacity: 0.5, envMapIntensity: 1.6 }),
     surfGeo: new THREE.CircleGeometry(1, 32),
   };
@@ -88,17 +97,18 @@ function sharedParts() {
 
 /* A glass of coffee. `mixed` = stirred light brown; otherwise milk at the bottom with dark coffee above.
    The coffee is clipped by a plane that follows the glass, so it can tilt. */
-function makeGlass({ ice, mixed }) {
+function makeGlass({ ice, mixed, dots }) {
   const p = sharedParts();
   const root = new THREE.Group();
   const glass = new THREE.Mesh(p.glassGeo, p.glassMat);
   glass.renderOrder = 4;
   root.add(glass);
+  if (dots) root.add(new THREE.Mesh(p.shellGeo, p.dotsMat));
   if (!mixed) root.add(new THREE.Mesh(p.milkGeo, p.milkMat));
   const plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 3);
   const coffeeMat = mixed
     ? new THREE.MeshStandardMaterial({ color: 0xb98a5a, roughness: 0.35, envMapIntensity: 0.9, side: THREE.DoubleSide, clippingPlanes: [plane] })
-    : new THREE.MeshStandardMaterial({ map: p.polka, roughness: 0.25, envMapIntensity: 1.1, side: THREE.DoubleSide, clippingPlanes: [plane] });
+    : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.22, envMapIntensity: 1.1, side: THREE.DoubleSide, clippingPlanes: [plane] });
   const coffee = new THREE.Mesh(mixed ? p.mixedGeo : p.layeredGeo, coffeeMat);
   const surface = new THREE.Mesh(p.surfGeo, new THREE.MeshStandardMaterial({ color: mixed ? 0xc59a6b : 0x3b2417, roughness: mixed ? 0.3 : 0.1, envMapIntensity: 1.3 }));
   surface.rotation.x = -Math.PI / 2;
@@ -339,7 +349,7 @@ export function startCoffee({ canvas, stage, onReady }) {
   stool2.rotation.y = 0.25;
   world.add(stool2);
   const SET_SCALE = 0.78;
-  const tableGlass = makeGlass({ ice: true, mixed: false });
+  const tableGlass = makeGlass({ ice: true, mixed: false, dots: true });
   const phinSet = new THREE.Group();
   phinSet.position.set(-15.4, SEAT, 0.4);
   phinSet.scale.setScalar(SET_SCALE);
@@ -387,7 +397,7 @@ export function startCoffee({ canvas, stage, onReady }) {
   const skull = new THREE.Mesh(new THREE.SphereGeometry(4.7, 40, 28), skin); skull.position.copy(HC);
   head.add(skull);
 
-  // Hair: a smooth cap, short locks beside the face, and a ponytail tied at the back.
+  // Hair: a smooth cap and a ponytail tied at the back.
   // The cap is a little larger than the head, so its clean rim is the hairline (no jagged crossing edges).
   const crown = new THREE.Mesh(new THREE.SphereGeometry(5.3, 72, 36, 0, Math.PI * 2, 0, Math.PI / 2), hairM);
   crown.position.set(HC.x, HC.y + 0.0, HC.z - 0.35);
@@ -395,15 +405,6 @@ export function startCoffee({ canvas, stage, onReady }) {
   const nape = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 20), hairM);       // fills in behind the head down to the neck
   nape.scale.set(4.9, 3.8, 3.7); nape.position.set(0, HC.y - 1.2, HC.z - 1.7);
   head.add(crown, nape);
-  const locks = [-1, 1].map((side) => {
-    const lock = new THREE.Group();                       // hangs from the temple and swings a little
-    lock.position.set(side * 4.55, HC.y + 1.0, HC.z + 0.4);
-    const m = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), hairM);
-    m.scale.set(0.8, 3.6, 1.15); m.position.set(0, -3.2, 0);
-    lock.add(m);
-    head.add(lock);
-    return lock;
-  });
   // ponytail: a hair tie and a tapered tail that swings
   const pony = new THREE.Group();
   pony.position.set(0, HC.y + 2.4, HC.z - 5.0);
@@ -495,7 +496,6 @@ export function startCoffee({ canvas, stage, onReady }) {
     head.rotation.x = -0.2 * s + 0.01 * idle;
     head.rotation.z = reduced ? 0 : Math.sin(t * 0.5) * 0.03;
     // hair swings a little
-    for (const [i, l] of locks.entries()) l.rotation.z = (reduced ? 0 : Math.sin(t * 1.3 + i) * 0.05) + (i === 0 ? 0.05 : -0.05);
     pony.rotation.x = reduced ? 0.35 : 0.35 + Math.sin(t * 1.6) * 0.1 + 0.12 * s;
     pony.rotation.z = reduced ? 0 : Math.sin(t * 1.15) * 0.1;
     mouth.visible = s < 0.45;
