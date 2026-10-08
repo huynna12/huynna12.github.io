@@ -19,9 +19,80 @@
   <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="canonical" href="https://huynna12.github.io/">
-  <link rel="stylesheet" href="style.css?v=26">
+  <script>try{if(!/[?&]intro\b/.test(location.search)&&sessionStorage.getItem('intro-seen'))document.documentElement.className+=' no-intro'}catch(e){}</script>
+  <noscript><style>.curtain{display:none!important}</style></noscript>
+  <link rel="stylesheet" href="style.css?v=29">
 </head>
 <body>
+  <div class="curtain" id="intro" role="presentation">
+    <svg class="curtain-art" viewBox="0 0 400 560" aria-hidden="true">
+      <defs>
+        <clipPath id="in-glass"><path d="M128 204 L145 368 H255 L272 204 Z"/></clipPath>
+        <linearGradient id="in-milk" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#3b2417"/><stop offset="0.55" stop-color="#c9a15f"/><stop offset="1" stop-color="#f4e6a8"/>
+        </linearGradient>
+      </defs>
+
+      <!-- balls drifting around, in the flag colors -->
+      <g class="ball f1"><circle cx="345" cy="70" r="62" fill="#d8352b"/><ellipse cx="326" cy="48" rx="22" ry="12" fill="#fff" opacity=".28" transform="rotate(-30 326 48)"/></g>
+      <g class="ball f2"><circle cx="40" cy="215" r="46" fill="#f1be2d"/><ellipse cx="26" cy="198" rx="15" ry="8" fill="#fff" opacity=".32" transform="rotate(-30 26 198)"/></g>
+      <g class="ball f3"><circle cx="66" cy="62" r="30" fill="#fff4e0"/></g>
+      <g class="ball f4"><circle cx="350" cy="480" r="44" fill="#2a5bb8"/><ellipse cx="335" cy="463" rx="15" ry="8" fill="#fff" opacity=".3" transform="rotate(-30 335 463)"/></g>
+      <g class="ball f5"><circle cx="118" cy="510" r="36" fill="#f1be2d"/><ellipse cx="106" cy="497" rx="12" ry="6" fill="#fff" opacity=".32" transform="rotate(-30 106 497)"/></g>
+      <g class="ball f6"><circle cx="338" cy="338" r="40" fill="#fff4e0"/></g>
+
+      <!-- shadow on the table -->
+      <ellipse cx="200" cy="388" rx="92" ry="9" fill="#000" opacity=".16"/>
+
+      <!-- glass body -->
+      <path d="M122 198 L140 374 Q141 380 148 380 H252 Q259 380 260 374 L278 198 Z" fill="#fff" fill-opacity=".1"/>
+      <g clip-path="url(#in-glass)">
+        <rect x="100" y="212" width="200" height="134" fill="#3b2417"/>
+        <rect x="100" y="322" width="200" height="50" fill="url(#in-milk)"/>
+        <rect x="100" y="352" width="200" height="20" fill="#f4e6a8"/>
+        <rect x="100" y="356" width="200" height="6" fill="#fff6c9" opacity=".6"/>
+        <!-- the dots -->
+        <g class="dot d1"><circle cx="168" cy="246" r="20" fill="#d8352b"/></g>
+        <g class="dot d2"><circle cx="226" cy="240" r="13" fill="#2a5bb8"/></g>
+        <g class="dot d3"><circle cx="270" cy="258" r="15" fill="#f1be2d"/></g>
+        <g class="dot d4"><circle cx="228" cy="288" r="19" fill="#fff4e0"/></g>
+        <g class="dot d5"><circle cx="160" cy="320" r="9" fill="#d8352b"/></g>
+        <g class="dot d6"><circle cx="196" cy="278" r="6" fill="#f1be2d"/></g>
+        <g class="dot d7"><circle cx="138" cy="282" r="8" fill="#2a5bb8"/></g>
+        <ellipse cx="200" cy="212" rx="72" ry="7" fill="#4a2c1c"/>
+      </g>
+
+      <!-- ice cubes: three fall in one by one -->
+      <g transform="translate(176 219)"><g class="ice i1"><rect x="-17" y="-17" width="34" height="34" rx="7"/><path d="M-10 -3 V-10 H-3" class="sh"/></g></g>
+      <g transform="translate(224 223)"><g class="ice i2"><rect x="-17" y="-17" width="34" height="34" rx="7"/><path d="M-10 -3 V-10 H-3" class="sh"/></g></g>
+      <g transform="translate(199 197)"><g class="ice i3"><rect x="-17" y="-17" width="34" height="34" rx="7"/><path d="M-10 -3 V-10 H-3" class="sh"/></g></g>
+
+      <!-- ripples and a splash of dots where each cube lands -->
+      <g transform="translate(176 213)"><ellipse class="rip r1" rx="8" ry="2.4"/></g>
+      <g transform="translate(224 213)"><ellipse class="rip r2" rx="8" ry="2.4"/></g>
+      <g transform="translate(199 205)"><ellipse class="rip r3" rx="8" ry="2.4"/></g>
+      <g transform="translate(176 208)">
+        <circle class="sp s1" r="5" fill="#d8352b" style="--dx:-34px;--dy:-58px"/><circle class="sp s1" r="4" fill="#f1be2d" style="--dx:-12px;--dy:-72px"/>
+        <circle class="sp s1" r="4.5" fill="#fff4e0" style="--dx:20px;--dy:-64px"/><circle class="sp s1" r="3.5" fill="#2a5bb8" style="--dx:38px;--dy:-44px"/>
+      </g>
+      <g transform="translate(224 208)">
+        <circle class="sp s2" r="5" fill="#2a5bb8" style="--dx:-38px;--dy:-48px"/><circle class="sp s2" r="4" fill="#fff4e0" style="--dx:-14px;--dy:-70px"/>
+        <circle class="sp s2" r="4.5" fill="#d8352b" style="--dx:16px;--dy:-66px"/><circle class="sp s2" r="3.5" fill="#f1be2d" style="--dx:36px;--dy:-52px"/>
+      </g>
+      <g transform="translate(199 198)">
+        <circle class="sp s3" r="5" fill="#f1be2d" style="--dx:-40px;--dy:-60px"/><circle class="sp s3" r="4" fill="#d8352b" style="--dx:-14px;--dy:-80px"/>
+        <circle class="sp s3" r="4.5" fill="#2a5bb8" style="--dx:18px;--dy:-74px"/><circle class="sp s3" r="3.5" fill="#fff4e0" style="--dx:42px;--dy:-54px"/>
+      </g>
+
+      <!-- glass outline and highlights on top -->
+      <ellipse cx="200" cy="198" rx="78" ry="9" fill="#d9e8ff" fill-opacity=".16" stroke="#eaf3ff" stroke-width="3"/>
+      <path d="M122 198 L140 374 Q141 380 148 380 H252 Q259 380 260 374 L278 198" fill="none" stroke="#eaf3ff" stroke-width="3" stroke-linejoin="round"/>
+      <rect x="148" y="216" width="3.2" height="112" rx="1.6" fill="#fff" opacity=".42"/>
+      <rect x="157" y="216" width="1.8" height="100" rx=".9" fill="#fff" opacity=".24"/>
+      <rect x="249" y="222" width="3" height="88" rx="1.5" fill="#fff" opacity=".3"/>
+    </svg>
+    <button class="curtain-skip" type="button" aria-label="Skip the intro animation">Skip</button>
+  </div>
   <a class="skip" href="#main">Skip to content</a>
   <div class="progress" aria-hidden="true"><span id="progress"></span></div>
 
@@ -151,7 +222,7 @@
 
   <footer><p>gg, thanks for stopping by. <span>Psst: press R.</span></p></footer>
 
-  <script src="data/site.js?v=26"></script>
-  <script src="script.js?v=26"></script>
+  <script src="data/site.js?v=29" defer></script>
+  <script src="script.js?v=29" defer></script>
 </body>
 </html>

@@ -13,6 +13,31 @@ const innerR = (y) => RI(y) - 0.03;
 const MILK_TOP = 2.6;
 const COFFEE_TOP = 8.8;
 
+// Dark coffee with a caramel blend at the bottom, scattered with flag-coloured dots (like the stamp art).
+function polkaTexture() {
+  const W = 512, H = 256;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  g.fillStyle = '#3b2417'; g.fillRect(0, 0, W, H);
+  const gr = g.createLinearGradient(0, H * 0.66, 0, H);
+  gr.addColorStop(0, 'rgba(201,161,95,0)'); gr.addColorStop(1, 'rgba(201,161,95,1)');
+  g.fillStyle = gr; g.fillRect(0, H * 0.66, W, H * 0.34);
+  const cols = ['#d8352b', '#2a5bb8', '#f1be2d', '#fff4e0'];
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const dots = [];
+  for (let i = 0; i < 17; i++) dots.push([rnd() * W, 14 + rnd() * (H * 0.6), 11 + rnd() * 24, cols[i % 4]]);
+  for (const [x, y, r, col] of dots) {
+    g.fillStyle = col;
+    for (const dx of [-W, 0, W]) { g.beginPath(); g.arc(x + dx, y, r, 0, Math.PI * 2); g.fill(); }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = THREE.RepeatWrapping;
+  t.anisotropy = 4;
+  return t;
+}
+
 let shared = null;
 function sharedParts() {
   if (shared) return shared;
@@ -53,7 +78,8 @@ function sharedParts() {
   shared = {
     glassGeo, milkGeo, layeredGeo, mixedGeo, iceGeo,
     glassMat: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.2, envMapIntensity: 1.5, side: THREE.DoubleSide, depthWrite: false }),
-    milkMat: new THREE.MeshStandardMaterial({ color: 0xf1dfc0, roughness: 0.55 }),
+    milkMat: new THREE.MeshStandardMaterial({ color: 0xf4e6a8, roughness: 0.5 }),
+    polka: polkaTexture(),
     iceMat: new THREE.MeshStandardMaterial({ color: 0xe3eef6, roughness: 0.1, transparent: true, opacity: 0.5, envMapIntensity: 1.6 }),
     surfGeo: new THREE.CircleGeometry(1, 32),
   };
@@ -72,9 +98,9 @@ function makeGlass({ ice, mixed }) {
   const plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 3);
   const coffeeMat = mixed
     ? new THREE.MeshStandardMaterial({ color: 0xb98a5a, roughness: 0.35, envMapIntensity: 0.9, side: THREE.DoubleSide, clippingPlanes: [plane] })
-    : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.22, envMapIntensity: 1.1, side: THREE.DoubleSide, clippingPlanes: [plane] });
+    : new THREE.MeshStandardMaterial({ map: p.polka, roughness: 0.25, envMapIntensity: 1.1, side: THREE.DoubleSide, clippingPlanes: [plane] });
   const coffee = new THREE.Mesh(mixed ? p.mixedGeo : p.layeredGeo, coffeeMat);
-  const surface = new THREE.Mesh(p.surfGeo, new THREE.MeshStandardMaterial({ color: mixed ? 0xc59a6b : 0x4a2c1c, roughness: mixed ? 0.3 : 0.1, envMapIntensity: 1.3 }));
+  const surface = new THREE.Mesh(p.surfGeo, new THREE.MeshStandardMaterial({ color: mixed ? 0xc59a6b : 0x3b2417, roughness: mixed ? 0.3 : 0.1, envMapIntensity: 1.3 }));
   surface.rotation.x = -Math.PI / 2;
   root.add(coffee, surface);
   const cubes = [];
@@ -278,6 +304,15 @@ export function startCoffee({ canvas, stage, onReady }) {
   blob(0.5, 3, 26, 0.45);
   blob(-15.2, 0, 21, 0.42);
 
+  /* floating balls in the flag colours, like the art */
+  const balls = [[-19, 24.5, -3, 2.3, 0xd8352b], [-9, 29.5, -5, 1.6, 0xf1be2d], [13.5, 17, -6, 2.0, 0xfff4e0], [-23.5, 14, -4, 1.7, 0x2a5bb8], [10.5, 5.5, -5, 1.5, 0xf1be2d]].map(([x, y, z, r, color], i) => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 28, 20), new THREE.MeshStandardMaterial({ color, roughness: 0.32, envMapIntensity: 1.1 }));
+    m.position.set(x, y, z);
+    m.userData = { y, ph: i * 1.3 };
+    world.add(m);
+    return m;
+  });
+
   /* materials */
   const red = new THREE.MeshStandardMaterial({ color: 0xb4271b, roughness: 0.5, envMapIntensity: 0.7 });
   const darkRed = new THREE.MeshStandardMaterial({ color: 0x7e1a12, roughness: 0.6 });
@@ -352,23 +387,34 @@ export function startCoffee({ canvas, stage, onReady }) {
   const skull = new THREE.Mesh(new THREE.SphereGeometry(4.7, 40, 28), skin); skull.position.copy(HC);
   head.add(skull);
 
-  // Long black hair, built from smooth shapes so there are no cut edges:
-  // a crown tilted back (curved hairline), flowing sections down each side, and a mass behind.
-  const crown = new THREE.Mesh(new THREE.SphereGeometry(5.04, 72, 36, 0, Math.PI * 2, 0, Math.PI / 2), hairM);
-  crown.position.set(HC.x, HC.y + 0.1, HC.z - 0.55);
-  crown.rotation.x = -0.36;
-  const longBack = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), hairM);
-  longBack.scale.set(4.5, 9.2, 3.3); longBack.position.set(0, HC.y - 4.8, HC.z - 3.5);
-  head.add(crown, longBack);
+  // Hair: a smooth cap, short locks beside the face, and a ponytail tied at the back.
+  // The cap is a little larger than the head, so its clean rim is the hairline (no jagged crossing edges).
+  const crown = new THREE.Mesh(new THREE.SphereGeometry(5.3, 72, 36, 0, Math.PI * 2, 0, Math.PI / 2), hairM);
+  crown.position.set(HC.x, HC.y + 0.0, HC.z - 0.35);
+  crown.rotation.x = -0.3;
+  const nape = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 20), hairM);       // fills in behind the head down to the neck
+  nape.scale.set(4.9, 3.8, 3.7); nape.position.set(0, HC.y - 1.2, HC.z - 1.7);
+  head.add(crown, nape);
   const locks = [-1, 1].map((side) => {
-    const lock = new THREE.Group();                       // pivots at the temple so it can swing
-    lock.position.set(side * 4.3, HC.y + 1.8, HC.z - 1.5);
-    const sheet = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), hairM);
-    sheet.scale.set(1.05, 5.6, 1.7); sheet.position.set(side * 0.15, -4.4, 0);
-    lock.add(sheet);
+    const lock = new THREE.Group();                       // hangs from the temple and swings a little
+    lock.position.set(side * 4.55, HC.y + 1.0, HC.z + 0.4);
+    const m = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), hairM);
+    m.scale.set(0.8, 3.6, 1.15); m.position.set(0, -3.2, 0);
+    lock.add(m);
     head.add(lock);
     return lock;
   });
+  // ponytail: a hair tie and a tapered tail that swings
+  const pony = new THREE.Group();
+  pony.position.set(0, HC.y + 2.4, HC.z - 5.0);
+  const tie = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.3, 10, 24), new THREE.MeshStandardMaterial({ color: 0xd9241c, roughness: 0.5 }));
+  tie.rotation.x = Math.PI / 2 + 0.4; tie.position.set(0, -0.3, 0);
+  const tailPts = [[0.001, 0.8], [0.9, 0.5], [1.5, -0.8], [1.65, -2.6], [1.3, -5.0], [0.7, -7.0], [0.001, -8.2]].map(([r, y]) => new THREE.Vector2(r, y));
+  const tail = new THREE.Mesh(new THREE.LatheGeometry(tailPts, 28), hairM);
+  pony.add(tail, tie);
+  pony.rotation.x = 0.35;
+  head.add(pony);
+  const longBack = pony;   // (the sway code below moves this)
 
   const faceZ = (x, y) => HC.z + Math.sqrt(Math.max(4.7 * 4.7 - x * x - (y - HC.y) * (y - HC.y), 0)) - 0.05;
   const eyes = [];
@@ -450,7 +496,8 @@ export function startCoffee({ canvas, stage, onReady }) {
     head.rotation.z = reduced ? 0 : Math.sin(t * 0.5) * 0.03;
     // hair swings a little
     for (const [i, l] of locks.entries()) l.rotation.z = (reduced ? 0 : Math.sin(t * 1.3 + i) * 0.05) + (i === 0 ? 0.05 : -0.05);
-    longBack.rotation.x = reduced ? 0 : Math.sin(t * 1.1) * 0.03 + 0.2 * s * 0.1;
+    pony.rotation.x = reduced ? 0.35 : 0.35 + Math.sin(t * 1.6) * 0.1 + 0.12 * s;
+    pony.rotation.z = reduced ? 0 : Math.sin(t * 1.15) * 0.1;
     mouth.visible = s < 0.45;
     // big round eyes: look toward the glass, glance up while sipping, blink now and then
     const blink = reduced ? 1 : (t % 4.6 > 4.46 ? 0.08 : 1);
@@ -458,6 +505,8 @@ export function startCoffee({ canvas, stage, onReady }) {
       e.eye.scale.y = M.lerp(e.eye.scale.y, blink, 0.6);
       e.pupil.position.set(e.base.x + 0.28 - 0.1 * s, e.base.y - 0.12 + 0.3 * s, e.base.z);
     }
+
+    for (const b of balls) b.position.y = b.userData.y + (reduced ? 0 : Math.sin(t * 0.8 + b.userData.ph) * 0.55);
 
     // glass
     lerpV(RIM_REST, RIM_MOUTH, s, tmpRim);
