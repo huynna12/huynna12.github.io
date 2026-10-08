@@ -124,18 +124,6 @@ function makePhin(steel) {
   return g;
 }
 
-/* A long spoon standing in the glass. */
-function makeSpoon(steel) {
-  const g = new THREE.Group();
-  const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.2, 10.6, 12), steel);
-  handle.position.y = 5.6;
-  const bowl = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), steel);
-  bowl.scale.set(0.7, 1.05, 0.26); bowl.position.y = 0.3;
-  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8), steel); tip.position.y = 10.95;
-  g.add(handle, bowl, tip);
-  return g;
-}
-
 /* ---------- The red plastic stool ---------- */
 const SEAT = 7.5;
 const STOOL = 11;      // width of the square top
@@ -364,24 +352,24 @@ export function startCoffee({ canvas, stage, onReady }) {
   const skull = new THREE.Mesh(new THREE.SphereGeometry(4.7, 40, 28), skin); skull.position.copy(HC);
   head.add(skull);
 
-  // long straight black hair, parted, with a lock down each side of the face
-  const wedge = 0.95;
-  const hairBack = new THREE.Mesh(new THREE.SphereGeometry(4.98, 40, 24, Math.PI / 2 + wedge, Math.PI * 2 - 2 * wedge, 0, Math.PI * 0.7), hairM);
-  hairBack.position.copy(HC);
-  const bangs = new THREE.Mesh(new THREE.SphereGeometry(4.98, 40, 16, Math.PI / 2 - wedge - 0.1, 2 * wedge + 0.2, 0, Math.PI * 0.33), hairM);
-  bangs.position.copy(HC);
+  // Long black hair, built from smooth shapes so there are no cut edges:
+  // a crown tilted back (curved hairline), flowing sections down each side, and a mass behind.
+  const crown = new THREE.Mesh(new THREE.SphereGeometry(5.04, 72, 36, 0, Math.PI * 2, 0, Math.PI / 2), hairM);
+  crown.position.set(HC.x, HC.y + 0.1, HC.z - 0.55);
+  crown.rotation.x = -0.36;
   const longBack = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), hairM);
-  longBack.scale.set(4.4, 8.6, 3.0); longBack.position.set(0, HC.y - 4.2, HC.z - 3.3);
-  head.add(hairBack, bangs, longBack);
+  longBack.scale.set(4.5, 9.2, 3.3); longBack.position.set(0, HC.y - 4.8, HC.z - 3.5);
+  head.add(crown, longBack);
   const locks = [-1, 1].map((side) => {
-    const lock = new THREE.Group();
-    lock.position.set(side * 4.75, HC.y + 0.4, HC.z + 1.5);
-    const m = new THREE.Mesh(new THREE.CapsuleGeometry(0.62, 8.4, 6, 14), hairM);
-    m.scale.set(1, 1, 0.5); m.position.y = -4.6;
-    lock.add(m);
+    const lock = new THREE.Group();                       // pivots at the temple so it can swing
+    lock.position.set(side * 4.3, HC.y + 1.8, HC.z - 1.5);
+    const sheet = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), hairM);
+    sheet.scale.set(1.05, 5.6, 1.7); sheet.position.set(side * 0.15, -4.4, 0);
+    lock.add(sheet);
     head.add(lock);
     return lock;
   });
+
   const faceZ = (x, y) => HC.z + Math.sqrt(Math.max(4.7 * 4.7 - x * x - (y - HC.y) * (y - HC.y), 0)) - 0.05;
   const eyes = [];
   for (const sx of [-1, 1]) {
@@ -402,8 +390,9 @@ export function startCoffee({ canvas, stage, onReady }) {
 
   const arms = [-1, 1].map((side) => ({
     side,
-    upperArm: limb(1.0, shirt), fore: limb(0.88, skin),
-    sh: new THREE.Mesh(new THREE.SphereGeometry(1.05, 14, 10), shirt),
+    upperArm: limb(0.98, skin), sleeve: limb(1.16, shirt), fore: limb(0.88, skin),
+    sh: new THREE.Mesh(new THREE.SphereGeometry(1.2, 14, 10), shirt),
+    sleeveEnd: new THREE.Mesh(new THREE.SphereGeometry(1.0, 14, 10), skin),
     el: new THREE.Mesh(new THREE.SphereGeometry(0.9, 12, 8), skin),
     hand: new THREE.Mesh(new THREE.SphereGeometry(1.05, 14, 10), skin),
     S: new THREE.Vector3(), E: new THREE.Vector3(), T: new THREE.Vector3(),
@@ -419,17 +408,12 @@ export function startCoffee({ canvas, stage, onReady }) {
     H: new THREE.Vector3(side * 1.9, SEAT + 1.2, 0.5), K: new THREE.Vector3(), A: new THREE.Vector3(),
     pole: new THREE.Vector3(0, 0.7, 1),
   }));
-  for (const a of arms) girl.add(a.upperArm, a.fore, a.sh, a.el, a.hand);
+  for (const a of arms) girl.add(a.upperArm, a.sleeve, a.fore, a.sh, a.el, a.hand);
   for (const l of legs) { girl.add(l.thigh, l.shin, l.hip, l.knee, l.shoe, l.soleM); l.shoe.scale.set(1.5, 1.0, 2.5); l.soleM.scale.set(1.55, 0.38, 2.6); }
 
   const held = makeGlass({ ice: true, mixed: true });
   const GS = 0.55;
   held.root.scale.setScalar(GS);
-  const spoonPivot = new THREE.Group();            // the spoon leans in the glass and stirs
-  const spoon = makeSpoon(steel);
-  spoon.position.set(-1.1, 0.9, 0); spoon.rotation.z = -0.19;
-  spoonPivot.add(spoon);
-  held.root.add(spoonPivot);
   girl.add(held.root);
 
   /* ---- animation ---- */
@@ -444,6 +428,7 @@ export function startCoffee({ canvas, stage, onReady }) {
   };
   const lerpV = (a, b, s, out) => out.set(M.lerp(a[0], b[0], s), M.lerp(a[1], b[1], s), M.lerp(a[2], b[2], s));
   const RIM_REST = [3.0, 17.0, 5.6], RIM_MOUTH = [0.3, 20.6, 4.9];
+  const sleeveEnd = new THREE.Vector3();
   const tmpRim = new THREE.Vector3(), tmpUp = new THREE.Vector3(), tmpO = new THREE.Vector3();
   const qTilt = new THREE.Quaternion(), eul = new THREE.Euler();
   const sipLevel = (t) => {
@@ -481,7 +466,6 @@ export function startCoffee({ canvas, stage, onReady }) {
     tmpO.copy(tmpRim).addScaledVector(tmpUp, -GLASS_H * GS);
     held.root.position.copy(tmpO);
     eul.set(-tilt, 0, 0); qTilt.setFromEuler(eul); held.root.quaternion.copy(qTilt);
-    spoonPivot.rotation.y = reduced ? 0.6 : t * 1.4 * (1 - s) + 0.6;
     const target = reduced ? 6.6 : sipLevel(t);
     lvl += (target - lvl) * Math.min(dt * 1.6, 1);
     held.setLevel(lvl, t, reduced);
@@ -495,6 +479,8 @@ export function startCoffee({ canvas, stage, onReady }) {
       else a.T.set(-2.6, SEAT + 4.6, 4.6);
       elbow(a.S, a.T, 4.5, 4.3, a.pole, a.E);
       setLimb(a.upperArm, a.S, a.E); setLimb(a.fore, a.E, a.T);
+      sleeveEnd.copy(a.E).sub(a.S).multiplyScalar(0.42).add(a.S);      // a short T-shirt sleeve
+      setLimb(a.sleeve, a.S, sleeveEnd);
       a.sh.position.copy(a.S); a.el.position.copy(a.E); a.hand.position.copy(a.T);
     }
 
@@ -573,6 +559,7 @@ export function startCoffee({ canvas, stage, onReady }) {
 
   // /?coffee=3.4 jumps the animation clock; &freeze=1 stops it. Handy for screenshots.
   const params = new URLSearchParams(location.search);
+  if (params.has('az')) { azBase = az = Number(params.get('az')); }
   const jump = Number(params.get('coffee'));
   if (jump > 0) { for (let n = 0; n < jump * 60; n++) step(1 / 60); } else step(0);
   const still = reduced || params.has('freeze');
