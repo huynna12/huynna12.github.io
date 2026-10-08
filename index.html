@@ -14,19 +14,18 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Huynh Ho, CS and Math student building backend and infrastructure software in Go and Python.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="theme-color" content="#f6f5fb">
+  <meta name="theme-color" content="#0b0d1a">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://huynna12.github.io/">
-  <link rel="preload" href="fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="preload" href="fonts/Bricolage.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <div class="xp" aria-hidden="true"><span id="xp"></span></div>
 
   <header class="bar">
-    <a class="brand" href="#top">Huynh Ho</a>
+    <a class="brand" href="#top"><span id="logo" aria-hidden="true"></span>Huynh Ho</a>
     <nav aria-label="Sections">
       <ul>
         <li><a href="#open-source">Open source</a></li>
@@ -44,50 +43,56 @@
       <div class="hero-text">
         <p class="kicker">Hi, I'm <span id="pref"></span></p>
         <h1 id="hero-title"><span id="name"></span></h1>
+        <div class="swatch" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <p class="lead" id="tagline"></p>
         <p class="seeking" id="seeking"></p>
         <div class="buttons" id="hero-buttons"></div>
       </div>
-      <aside class="sheet" aria-label="Character sheet">
-        <p class="sheet-title">Character sheet</p>
-        <dl id="sheet"></dl>
-      </aside>
+      <div class="stage" id="stage" aria-hidden="true">
+        <canvas id="board"></canvas>
+        <div class="hud"><span>LINES <b id="lines">00</b></span><span>PIECES <b id="pieces">00</b></span></div>
+      </div>
+    </section>
+
+    <section class="sheet-wrap" aria-label="Character sheet">
+      <p class="sheet-title">Character sheet</p>
+      <dl id="sheet" class="sheet"></dl>
     </section>
 
     <section id="open-source" aria-labelledby="os-title">
-      <p class="num">01</p>
+      <p class="num" data-piece="T">Level 01</p>
       <h2 id="os-title">Open source</h2>
-      <p class="intro">Merged pull requests in real projects. Every PR number links to GitHub.</p>
+      <p class="intro">Each merged pull request is a cleared line. Every PR number links to GitHub.</p>
       <div id="os-list"></div>
     </section>
 
     <section id="projects" aria-labelledby="proj-title">
-      <p class="num">02</p>
+      <p class="num" data-piece="L">Level 02</p>
       <h2 id="proj-title">Projects</h2>
       <div id="proj-list"></div>
     </section>
 
     <section id="skills" aria-labelledby="skills-title">
-      <p class="num">03</p>
+      <p class="num" data-piece="S">Level 03</p>
       <h2 id="skills-title">Skills</h2>
       <p class="intro">Inventory.</p>
       <dl id="skills-list" class="inventory"></dl>
     </section>
 
     <section id="background" aria-labelledby="bg-title">
-      <p class="num">04</p>
+      <p class="num" data-piece="O">Level 04</p>
       <h2 id="bg-title">Education and experience</h2>
       <div id="bg-list"></div>
     </section>
 
     <section id="side-quests" aria-labelledby="sq-title">
-      <p class="num">05</p>
+      <p class="num" data-piece="Z">Bonus level</p>
       <h2 id="sq-title">Side quests</h2>
       <ul id="sq-list" class="quests"></ul>
     </section>
 
     <section id="contact" aria-labelledby="contact-title">
-      <p class="num">06</p>
+      <p class="num" data-piece="J">Final level</p>
       <h2 id="contact-title">Contact</h2>
       <p class="intro">Email is the fastest way to reach me.</p>
       <div class="buttons" id="contact-buttons"></div>
@@ -103,7 +108,7 @@
 
   <footer><p>Built by hand with HTML, CSS and JavaScript. Psst: try the Konami code.</p></footer>
 
-  <script src="data/site.js?v=3"></script>
-  <script src="script.js?v=3"></script>
+  <script src="data/site.js?v=5"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>

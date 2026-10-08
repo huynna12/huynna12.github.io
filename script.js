@@ -21,17 +21,36 @@ const ext = (label, url, cls = 'btn') =>
 const bullets = (list) =>
   list && list.length ? h('ul', { class: 'bullets' }, list.map((b) => h('li', null, b))) : null;
 
-// A tiny pixel star, drawn as SVG rects so it stays crisp at any size.
-function star() {
+// Tetromino icons, drawn as SVG squares.
+const PIECES = {
+  I: [[0, 0], [1, 0], [2, 0], [3, 0]],
+  O: [[0, 0], [1, 0], [0, 1], [1, 1]],
+  T: [[0, 0], [1, 0], [2, 0], [1, 1]],
+  S: [[0, 0], [1, 0], [1, 1], [2, 1]],
+  Z: [[1, 0], [2, 0], [0, 1], [1, 1]],
+  J: [[0, 0], [1, 0], [2, 0], [0, 1]],
+  L: [[0, 0], [1, 0], [2, 0], [2, 1]],
+};
+function piece(type, size = 0.8) {
   const ns = 'http://www.w3.org/2000/svg';
+  const cells = PIECES[type];
+  const w = Math.max(...cells.map((c) => c[0])) + 1;
+  const hgt = Math.max(...cells.map((c) => c[1])) + 1;
   const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('viewBox', '0 0 7 7');
-  svg.setAttribute('class', 'star');
+  svg.setAttribute('viewBox', `0 0 ${w} ${hgt}`);
+  svg.setAttribute('width', `${w * size}em`);
+  svg.setAttribute('height', `${hgt * size}em`);
+  svg.setAttribute('class', `pc pc-${type}`);
   svg.setAttribute('aria-hidden', 'true');
-  svg.setAttribute('shape-rendering', 'crispEdges');
-  const d = document.createElementNS(ns, 'path');
-  d.setAttribute('d', 'M3 0h1v2h3v1H5v1l1 3H4V5H3v2H1l1-3V3H0V2h3z');
-  svg.append(d);
+  for (const [x, y] of cells) {
+    const r = document.createElementNS(ns, 'rect');
+    r.setAttribute('x', x + 0.06);
+    r.setAttribute('y', hgt - 1 - y + 0.06);
+    r.setAttribute('width', 0.88);
+    r.setAttribute('height', 0.88);
+    r.setAttribute('rx', 0.16);
+    svg.append(r);
+  }
   return svg;
 }
 
@@ -83,14 +102,16 @@ $('pref').textContent = SITE.preferredName;
 $('tagline').textContent = SITE.tagline;
 $('seeking').textContent = SITE.seeking;
 $('sheet').append(...SITE.sheet.map((r) => h('div', null, h('dt', null, r.k), h('dd', null, r.v))));
+$('logo').append(piece('T', 0.45));
+document.querySelectorAll('.num[data-piece]').forEach((n) => n.prepend(piece(n.dataset.piece, 0.55)));
 buttons($('hero-buttons'), true);
 buttons($('contact-buttons'), false);
 
 // Open source
 const prRow = (p, fallbackTitle) => h('li', { class: 'pr' },
   h('div', { class: 'pr-head' },
-    star(),
-    h('span', { class: 'unlocked' }, 'Achievement unlocked'),
+    piece('I', 0.55),
+    h('span', { class: 'unlocked' }, 'Line cleared'),
     ext('#' + p.number, p.url, 'prnum'),
     h('span', { class: 'merged' }, 'Merged'),
     p.merged ? h('span', { class: 'date' }, p.merged) : null),
@@ -127,8 +148,9 @@ $('proj-list').append(...SITE.projects.map((p, i) =>
     p.diagram ? flow(p.diagram) : null)));
 
 // Skills
+const SKILL_PIECES = { Languages: 'I', Infrastructure: 'J', 'Backend and Observability': 'S', AI: 'Z' };
 $('skills-list').append(...SITE.skills.map((s) =>
-  h('div', null, h('dt', null, s.group), h('dd', null, s.items.join(', ')))));
+  h('div', null, h('dt', null, piece(SKILL_PIECES[s.group] || 'T', 0.5), s.group), h('dd', null, s.items.join(', ')))));
 
 // Education and experience
 const E = SITE.education;
@@ -183,3 +205,19 @@ addEventListener('keydown', (e) => {
     document.documentElement.dataset.theme = on ? 'gb' : '';
   }
 });
+
+// The 3D board loads after the page is ready so it never blocks first paint.
+function loadBoard() {
+  if (navigator.connection && navigator.connection.saveData) return $('stage').classList.add('nogl');
+  import('./board.js?v=5').then((m) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const ok = m.startBoard({
+      canvas: $('board'),
+      stage: $('stage'),
+      onStats: (l, p) => { $('lines').textContent = pad(l); $('pieces').textContent = pad(p); },
+    });
+    if (!ok) $('stage').classList.add('nogl');
+  }).catch((e) => { $('stage').dataset.err = String(e && e.message || e).slice(0, 160); $('stage').classList.add('nogl'); });
+}
+if (document.readyState === 'complete') setTimeout(loadBoard, 0);
+else addEventListener('load', () => (window.requestIdleCallback ? requestIdleCallback(loadBoard, { timeout: 1500 }) : setTimeout(loadBoard, 300)));
