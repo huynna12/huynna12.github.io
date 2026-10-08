@@ -458,7 +458,7 @@ export function startCoffee({ canvas, stage, onReady }) {
   for (const a of arms) girl.add(a.upperArm, a.sleeve, a.fore, a.sh, a.el, a.hand);
   for (const l of legs) { girl.add(l.thigh, l.shin, l.hip, l.knee, l.shoe, l.soleM); l.shoe.scale.set(1.5, 1.0, 2.5); l.soleM.scale.set(1.55, 0.38, 2.6); }
 
-  const held = makeGlass({ ice: true, mixed: true });
+  const held = makeGlass({ ice: true, mixed: true, dots: true });
   const GS = 0.55;
   held.root.scale.setScalar(GS);
   girl.add(held.root);

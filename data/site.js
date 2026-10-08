@@ -3,14 +3,14 @@
 const SITE = {
   name: "Huynh Ho",
   preferredName: "Heidi",
-  tagline: "CS and Math student at Gettysburg College building backend and infrastructure software in Go and Python.",
-  seeking: "Looking for full-time Software Engineer roles starting May 2027.",
+  tagline: "CS and Math double major, minor in Data Science.",
+  seeking: "Open to new grad 2027 roles.",
   // Shown as "At a glance" under the hero.
   sheet: [
     { k: "From", v: "Ho Chi Minh City, Vietnam" },
     { k: "Based in", v: "Gettysburg, PA" },
     { k: "Works in", v: "Go, Python" },
-    { k: "Looking for", v: "A full-time SWE role, starting May 2027" },
+    { k: "Looking for", v: "New grad 2027 roles" },
     { k: "Fuel", v: "Vietnamese iced coffee" }
   ],
 
