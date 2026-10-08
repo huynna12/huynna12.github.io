@@ -53,17 +53,26 @@ buttons($('contact-buttons'), false);
 
 // Open source
 $('os-list').append(...SITE.openSource.map((o) => {
-  const prs = o.prs.map((p) =>
-    h('li', null,
-      ext('#' + p.number, p.url, 'pr'),
-      h('span', { class: 'merged' }, 'Merged'),
-      p.merged && p.merged !== 'Merged' ? h('span', { class: 'date' }, p.merged) : null));
-  return h('article', { class: 'card' },
-    h('header', null,
-      h('h3', null, ext(o.repo, o.repoUrl, 'plain')),
-      h('p', { class: 'muted' }, o.blurb)),
+  const header = h('header', null,
+    h('h3', null, ext(o.repo, o.repoUrl, 'plain')),
+    h('p', { class: 'muted' }, o.blurb));
+  const badge = (p) => [
+    ext('#' + p.number, p.url, 'pr'),
+    h('span', { class: 'merged' }, 'Merged'),
+    p.merged ? h('span', { class: 'date' }, p.merged) : null,
+  ];
+  // Repos where each PR has its own description list one row per PR.
+  if (o.prs.every((p) => p.text)) {
+    return h('article', { class: 'card' }, header,
+      h('ul', { class: 'pr-rows' }, o.prs.map((p) =>
+        h('li', null,
+          h('div', { class: 'pr-head' }, badge(p)),
+          p.title ? h('p', { class: 'mono' }, p.title) : null,
+          h('p', null, p.text)))));
+  }
+  return h('article', { class: 'card' }, header,
     o.summary ? h('p', { class: 'mono' }, o.summary) : null,
-    h('ul', { class: 'prs' }, prs),
+    h('ul', { class: 'prs' }, o.prs.map((p) => h('li', null, badge(p)))),
     bullets(o.bullets));
 }));
 

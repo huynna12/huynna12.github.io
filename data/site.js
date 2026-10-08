@@ -32,15 +32,21 @@ const SITE = {
       repoUrl: "https://github.com/FastCrest/tether",
       blurb: "Edge-to-cloud AI deployment CLI with 83+ stars.",
       prs: [
-        { number: 220, url: "https://github.com/FastCrest/tether/pull/220", merged: "Merged" },
-        { number: 258, url: "https://github.com/FastCrest/tether/pull/258", merged: "Merged" },
-        { number: 304, url: "https://github.com/FastCrest/tether/pull/304", merged: "Merged" }
-      ],
-      // TODO: tell me which PR number matches which bullet, and I will put each bullet next to its PR.
-      bullets: [
-        "Built request-ID middleware that stamps every API response with a UUID, so one request can be traced across a fleet. Merged after code review, with 5 unit tests.",
-        "Fixed silent data loss on unclean shutdown by flushing pending writes at exit, with 6 tests.",
-        "Restored a Prometheus metric that never emitted in production and fixed a double-counting bug."
+        {
+          number: 220, url: "https://github.com/FastCrest/tether/pull/220", merged: "Jun 17, 2026",
+          title: "feat(api): add X-Reflex-Request-ID header middleware",
+          text: "Built request-ID middleware that stamps every API response with a UUID, so one request can be traced across a fleet. Merged after code review, with 5 unit tests."
+        },
+        {
+          number: 258, url: "https://github.com/FastCrest/tether/pull/258", merged: "Aug 28, 2026",
+          title: "Fix/episode cache bytes metric wiring",
+          text: "Restored a Prometheus metric that never emitted in production and fixed a double-counting bug."
+        },
+        {
+          number: 304, url: "https://github.com/FastCrest/tether/pull/304", merged: "Aug 28, 2026",
+          title: "fix(runtime): flush recorder queue when the process exits",
+          text: "Fixed silent data loss on unclean shutdown by flushing pending writes at exit, with 6 tests."
+        }
       ]
     }
   ],

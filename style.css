@@ -186,3 +186,7 @@ footer { max-width: var(--max); margin: 4rem auto 0; padding: 1.5rem 1rem 3rem; 
   html { scroll-behavior: auto; }
   .btn { transition: none; }
 }
+
+.pr-rows { list-style: none; padding: 0; margin: 0.5rem 0 0.25rem; }
+.pr-rows li { border-top: 2px dashed var(--muted); padding: 0.9rem 0 0.4rem; }
+.pr-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
