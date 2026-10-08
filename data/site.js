@@ -7,11 +7,11 @@ const SITE = {
   seeking: "Looking for full-time Software Engineer roles starting May 2027.",
   // Shown as "At a glance" under the hero.
   sheet: [
-    { k: "From", v: "S\u00e0i G\u00f2n (Ho Chi Minh City)" },
+    { k: "From", v: "Ho Chi Minh City, Vietnam" },
     { k: "Based in", v: "Gettysburg, PA" },
     { k: "Works in", v: "Go, Python" },
     { k: "Looking for", v: "A full-time SWE role, starting May 2027" },
-    { k: "Fuel", v: "C\u00e0 ph\u00ea s\u1eefa \u0111\u00e1" }
+    { k: "Fuel", v: "Vietnamese iced coffee" }
   ],
 
   links: {
@@ -178,5 +178,5 @@ const SITE = {
     { text: "Travel" },
     { text: "Save the world" }
   ],
-  alwaysOn: "C\u00e0 ph\u00ea s\u1eefa \u0111\u00e1. Long runs. League of Legends."
+  alwaysOn: "Vietnamese iced coffee. Long runs. League of Legends."
 };

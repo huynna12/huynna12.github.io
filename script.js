@@ -42,35 +42,30 @@ function shot(s) {
     h('span', { class: 'cap' }, s.caption));
 }
 
-function buttons(target, withResume) {
+function contactButtons(target) {
   const L = SITE.links;
-  const row = [
+  target.append(
     ext('GitHub', L.github),
     ext('LinkedIn', L.linkedin),
-    h('a', { class: 'btn', href: 'mailto:' + L.email }, 'Email'),
-  ];
-  if (withResume) {
-    const r = h('a', { class: 'btn is-disabled', 'aria-disabled': 'true' }, 'Resume (coming soon)');
-    row.push(r);
-    fetch(L.resume, { method: 'HEAD' }).then((res) => {
-      if (!res.ok) return;
-      r.className = 'btn btn-primary';
-      r.textContent = 'Resume (PDF)';
-      r.href = L.resume;
-      r.removeAttribute('aria-disabled');
-    }).catch(() => {});
-  }
-  target.append(...row);
+    h('a', { class: 'btn', href: 'mailto:' + L.email }, 'Email'));
 }
 
+// The resume button is in the HTML; turn it on once the file is confirmed to exist.
+(function () {
+  const r = $('resume-btn');
+  if (!r) return;
+  fetch(SITE.links.resume, { method: 'HEAD' }).then((res) => {
+    if (!res.ok) return;
+    r.className = 'btn btn-primary';
+    r.href = SITE.links.resume;
+    r.removeAttribute('aria-disabled');
+    r.removeAttribute('title');
+  }).catch(() => {});
+})();
+
 // Hero
-$('name').textContent = SITE.name;
-$('pref').textContent = SITE.preferredName;
-$('tagline').textContent = SITE.tagline;
-$('seeking').textContent = SITE.seeking;
 $('glance').append(...SITE.sheet.map((r) => h('div', null, h('dt', null, r.k), h('dd', null, r.v))));
-buttons($('hero-buttons'), true);
-buttons($('contact-buttons'), false);
+contactButtons($('contact-buttons'));
 
 // Open source
 const prRow = (p, fallbackTitle) => h('li', { class: 'pr' },
@@ -179,3 +174,14 @@ addEventListener('keydown', (e) => {
   if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
   if (e.key === 'r' || e.key === 'R') beanShower();
 });
+
+// The 3D scene loads after the page is ready. The line drawing stays as the fallback.
+const fig = $('phin-fig');
+function loadCoffee() {
+  if (navigator.connection && navigator.connection.saveData) return;
+  import('./coffee.js?v=19').then((m) => {
+    m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
+  }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
+}
+if (document.readyState === 'complete') setTimeout(loadCoffee, 0);
+else addEventListener('load', () => (window.requestIdleCallback ? requestIdleCallback(loadCoffee, { timeout: 1500 }) : setTimeout(loadCoffee, 300)));

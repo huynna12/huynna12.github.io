@@ -19,7 +19,11 @@
   <link rel="canonical" href="https://huynna12.github.io/">
   <link rel="preload" href="fonts/BeVietnamPro-n300-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/BeVietnamPro-n500-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="preload" href="fonts/BeVietnamPro-n400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/BeVietnamPro-n600-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Newsreader-i400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/JetBrainsMono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -42,14 +46,21 @@
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="hero-text">
-        <p class="hello">Xin chào, mình là <span id="pref"></span>.</p>
-        <h1 id="hero-title"><span id="name"></span><i class="dot">.</i></h1>
-        <p class="lead" id="tagline"></p>
-        <p class="seeking" id="seeking"></p>
-        <div class="buttons" id="hero-buttons"></div>
+        <!-- The hero is plain HTML so it exists at first paint (no layout jump). Keep it in step with data/site.js. -->
+        <p class="hello">Hi, I'm <span id="pref">Heidi</span>.</p>
+        <h1 id="hero-title"><span id="name">Huynh Ho</span><i class="dot">.</i></h1>
+        <p class="lead" id="tagline">CS and Math student at Gettysburg College building backend and infrastructure software in Go and Python.</p>
+        <p class="seeking" id="seeking">Looking for full-time Software Engineer roles starting May 2027.</p>
+        <div class="buttons" id="hero-buttons">
+          <a class="btn" href="https://github.com/huynna12" target="_blank" rel="noopener">GitHub</a>
+          <a class="btn" href="https://linkedin.com/in/heidi-ho-16b875246" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="btn" href="mailto:honhuhuynh1210@gmail.com">Email</a>
+          <a class="btn is-disabled" id="resume-btn" aria-disabled="true" title="Resume coming soon">Resume (PDF)</a>
+        </div>
       </div>
 
-      <figure class="phin" aria-label="A line drawing of a Vietnamese phin filter dripping coffee into a glass">
+      <figure class="phin" id="phin-fig" aria-label="A girl on a red plastic stool sipping iced coffee, next to a phin filter dripping into a glass">
+        <div class="phin-stage" id="coffee-stage">
         <svg viewBox="0 0 240 320" role="img" aria-hidden="true">
           <defs>
             <clipPath id="glass-clip"><path d="M80.5 153 L93.7 289 H146.3 L159.5 153 Z"/></clipPath>
@@ -77,7 +88,9 @@
           <!-- drip -->
           <path class="drop" d="M120 151 q-4.5 7 0 11 q4.5 -4 0 -11z"/>
         </svg>
-        <figcaption>cà phê sữa đá</figcaption>
+          <canvas id="coffee" aria-hidden="true"></canvas>
+        </div>
+        <figcaption>Coffee break</figcaption>
       </figure>
     </section>
 
@@ -88,42 +101,42 @@
 
     <section id="open-source" aria-labelledby="os-title">
       <p class="km">km 5</p>
-      <h2 id="os-title">Open source <em>Mã nguồn mở</em></h2>
+      <h2 id="os-title">Open source</h2>
       <p class="intro">Merged pull requests in real projects. Every PR number links to GitHub.</p>
       <div id="os-list"></div>
     </section>
 
     <section id="projects" aria-labelledby="proj-title">
       <p class="km">km 10</p>
-      <h2 id="proj-title">Projects <em>Dự án</em></h2>
+      <h2 id="proj-title">Projects</h2>
       <div id="proj-list"></div>
     </section>
 
     <section id="skills" aria-labelledby="skills-title">
       <p class="km">km 15</p>
-      <h2 id="skills-title">Skills <em>Kỹ năng</em></h2>
+      <h2 id="skills-title">Skills</h2>
       <dl id="skills-list" class="menu"></dl>
     </section>
 
     <section id="background" aria-labelledby="bg-title">
       <p class="km">km 21.1 <span>half marathon</span></p>
-      <h2 id="bg-title">Education and experience <em>Học vấn và kinh nghiệm</em></h2>
+      <h2 id="bg-title">Education and experience</h2>
       <div id="bg-list"></div>
     </section>
 
     <section id="outside-work" aria-labelledby="ow-title">
       <p class="km">km 30</p>
-      <h2 id="ow-title">Outside work <em>Ngoài giờ làm</em></h2>
+      <h2 id="ow-title">Outside work</h2>
       <ul id="ow-list" class="quests"></ul>
       <p class="always"><span>Always on</span> <i id="always"></i></p>
     </section>
 
     <section id="contact" aria-labelledby="contact-title">
       <p class="km">km 42.2 <span>finish</span></p>
-      <h2 id="contact-title">Contact <em>Liên hệ</em></h2>
+      <h2 id="contact-title">Contact</h2>
       <p class="intro">Email is the fastest way to reach me.</p>
       <div class="buttons" id="contact-buttons"></div>
-      <p class="thanks">Cảm ơn bạn đã ghé thăm.</p>
+      <p class="thanks">Thanks for stopping by.</p>
     </section>
 
     <noscript>
@@ -136,7 +149,7 @@
 
   <footer><p>gg, thanks for stopping by. <span>Psst: press R.</span></p></footer>
 
-  <script src="data/site.js?v=12"></script>
-  <script src="script.js?v=12"></script>
+  <script src="data/site.js?v=19"></script>
+  <script src="script.js?v=19"></script>
 </body>
 </html>
