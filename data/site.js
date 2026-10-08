@@ -5,6 +5,13 @@ const SITE = {
   preferredName: "Heidi",
   tagline: "CS and Math student at Gettysburg College building backend and infrastructure software in Go and Python.",
   seeking: "Looking for full-time Software Engineer roles starting May 2027.",
+  sheet: [
+    { k: "Class", v: "Backend and infrastructure" },
+    { k: "Home base", v: "Gettysburg, PA" },
+    { k: "Main weapons", v: "Go, Python" },
+    { k: "Current quest", v: "A full-time SWE role, starting May 2027" },
+    { k: "Status", v: "Looking for a team" }
+  ],
   links: {
     github: "https://github.com/huynna12",
     linkedin: "https://linkedin.com/in/heidi-ho-16b875246",
@@ -163,9 +170,10 @@ const SITE = {
   ],
 
   sideQuests: [
-    "Save the world.",
-    "Run a full marathon this year. The half is done.",
-    "Learn sign language.",
-    "Travel."
+    { text: "Run a half marathon", done: true },
+    { text: "Run a full marathon this year" },
+    { text: "Learn sign language" },
+    { text: "Travel" },
+    { text: "Save the world" }
   ]
 };

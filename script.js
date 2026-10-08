@@ -15,15 +15,26 @@ function h(tag, attrs, ...kids) {
   return el;
 }
 
-const ext = (label, url, cls = 'btn', extra) =>
-  h('a', { class: cls, href: url, target: '_blank', rel: 'noopener' }, label, extra);
+const ext = (label, url, cls = 'btn') =>
+  h('a', { class: cls, href: url, target: '_blank', rel: 'noopener' }, label);
 
-function bullets(list) {
-  return list.length ? h('ul', { class: 'bullets' }, list.map((b) => h('li', null, b))) : null;
+const bullets = (list) =>
+  list && list.length ? h('ul', { class: 'bullets' }, list.map((b) => h('li', null, b))) : null;
+
+// A tiny pixel star, drawn as SVG rects so it stays crisp at any size.
+function star() {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 7 7');
+  svg.setAttribute('class', 'star');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('shape-rendering', 'crispEdges');
+  const d = document.createElementNS(ns, 'path');
+  d.setAttribute('d', 'M3 0h1v2h3v1H5v1l1 3H4V5H3v2H1l1-3V3H0V2h3z');
+  svg.append(d);
+  return svg;
 }
 
-
-// Small flow diagram: rows of steps, with optional parallel groups.
 function flow(d) {
   const stepEl = (s) => s.parallel
     ? h('div', { class: 'par' }, s.parallel.map((x) => h('span', { class: 'step' }, x)))
@@ -37,9 +48,12 @@ function flow(d) {
 }
 
 function shot(s) {
+  const host = s.url.replace('http://', '');
   return h('a', { class: 'shot', href: s.url, target: '_blank', rel: 'noopener' },
+    h('span', { class: 'chrome', 'aria-hidden': 'true' },
+      h('i'), h('i'), h('i'), h('b', null, host + ' (HTTP)')),
     h('img', { src: s.src, alt: s.alt, width: s.w, height: s.h, loading: 'lazy' }),
-    h('span', null, s.caption + ' (runs over HTTP)'));
+    h('span', { class: 'cap' }, s.caption));
 }
 
 function buttons(target, withResume) {
@@ -50,7 +64,7 @@ function buttons(target, withResume) {
     h('a', { class: 'btn', href: 'mailto:' + L.email }, 'Email'),
   ];
   if (withResume) {
-    const r = h('a', { class: 'btn btn-ghost is-disabled', 'aria-disabled': 'true' }, 'Resume (coming soon)');
+    const r = h('a', { class: 'btn is-disabled', 'aria-disabled': 'true' }, 'Resume (coming soon)');
     row.push(r);
     fetch(L.resume, { method: 'HEAD' }).then((res) => {
       if (!res.ok) return;
@@ -68,78 +82,104 @@ $('name').textContent = SITE.name;
 $('pref').textContent = SITE.preferredName;
 $('tagline').textContent = SITE.tagline;
 $('seeking').textContent = SITE.seeking;
+$('sheet').append(...SITE.sheet.map((r) => h('div', null, h('dt', null, r.k), h('dd', null, r.v))));
 buttons($('hero-buttons'), true);
 buttons($('contact-buttons'), false);
 
 // Open source
-$('os-list').append(...SITE.openSource.map((o) => {
-  const header = h('header', null,
-    h('h3', null, ext(o.repo, o.repoUrl, 'plain')),
-    h('p', { class: 'muted' }, o.blurb));
-  const badge = (p) => [
-    ext('#' + p.number, p.url, 'pr'),
+const prRow = (p, fallbackTitle) => h('li', { class: 'pr' },
+  h('div', { class: 'pr-head' },
+    star(),
+    h('span', { class: 'unlocked' }, 'Achievement unlocked'),
+    ext('#' + p.number, p.url, 'prnum'),
     h('span', { class: 'merged' }, 'Merged'),
-    p.merged ? h('span', { class: 'date' }, p.merged) : null,
-  ];
-  // Repos where each PR has its own description list one row per PR.
-  if (o.prs.every((p) => p.text)) {
-    return h('article', { class: 'card' }, header,
-      h('ul', { class: 'pr-rows' }, o.prs.map((p) =>
-        h('li', null,
-          h('div', { class: 'pr-head' }, badge(p)),
-          p.title ? h('p', { class: 'mono' }, p.title) : null,
-          h('p', null, p.text)))));
-  }
-  return h('article', { class: 'card' }, header,
-    o.summary ? h('p', { class: 'mono' }, o.summary) : null,
-    h('ul', { class: 'prs' }, o.prs.map((p) => h('li', null, badge(p)))),
-    bullets(o.bullets),
-    o.diagram ? flow(o.diagram) : null);
-}));
+    p.merged ? h('span', { class: 'date' }, p.merged) : null),
+  p.title || fallbackTitle ? h('p', { class: 'mono' }, p.title || fallbackTitle) : null,
+  p.text ? h('p', null, p.text) : null);
+
+$('os-list').append(...SITE.openSource.map((o) =>
+  h('article', { class: 'repo' },
+    h('div', { class: 'repo-side' },
+      h('h3', null, ext(o.repo, o.repoUrl, 'plain')),
+      h('p', { class: 'muted' }, o.blurb)),
+    h('div', { class: 'repo-main' },
+      h('ul', { class: 'prs' }, o.prs.map((p) => prRow(p, o.summary))),
+      bullets(o.bullets),
+      o.diagram ? flow(o.diagram) : null))));
 
 // Projects
-$('proj-list').append(...SITE.projects.map((p) =>
-  h('article', { class: 'card' },
-    p.shot ? shot(p.shot) : null,
+$('proj-list').append(...SITE.projects.map((p, i) =>
+  h('article', { class: 'project' },
     h('header', null,
+      h('span', { class: 'idx' }, String(i + 1).padStart(2, '0')),
       h('h3', null, p.name),
       p.status ? h('span', { class: 'status' }, p.status) : null),
-    h('p', null, p.purpose),
-    h('ul', { class: 'tags', 'aria-label': 'Technologies' }, p.tags.map((t) => h('li', null, t))),
-    bullets(p.bullets),
-    p.diagram ? flow(p.diagram) : null,
-    p.links.length
-      ? h('p', { class: 'links' }, p.links.map((l) =>
-          h('span', null, ext(l.label, l.url, 'plain'), l.note ? h('small', null, ' (' + l.note + ')') : null)))
-      : null)));
+    h('p', { class: 'purpose' }, p.purpose),
+    h('div', { class: 'proj-body' },
+      h('div', null,
+        h('ul', { class: 'tags', 'aria-label': 'Technologies' }, p.tags.map((t) => h('li', null, t))),
+        bullets(p.bullets),
+        p.links.length
+          ? h('p', { class: 'links' }, p.links.map((l) =>
+              h('span', null, ext(l.label, l.url, 'plain'), l.note ? h('small', null, ' (' + l.note + ')') : null)))
+          : null),
+      p.shot ? shot(p.shot) : null),
+    p.diagram ? flow(p.diagram) : null)));
 
 // Skills
 $('skills-list').append(...SITE.skills.map((s) =>
-  h('div', { class: 'card' }, h('h3', null, s.group), h('p', null, s.items.join(', ')))));
+  h('div', null, h('dt', null, s.group), h('dd', null, s.items.join(', ')))));
 
-// Background
+// Education and experience
 const E = SITE.education;
 $('bg-list').append(
-  h('article', { class: 'card' },
+  h('article', { class: 'job' },
     h('h3', null, E.school),
     h('p', null, E.degree),
     h('p', { class: 'muted' }, E.detail),
     h('p', { class: 'muted' }, 'Coursework: ' + E.coursework.join(', '))),
   ...SITE.experience.map((x) =>
-    h('article', { class: 'card' },
+    h('article', { class: 'job' },
       h('h3', null, x.role),
       h('p', { class: 'muted' }, [x.where, x.when].filter(Boolean).join(' | ')),
       h('p', null, x.text))));
 
 // Side quests
-$('now-list').append(...SITE.sideQuests.map((c) => h('li', null, c)));
+$('sq-list').append(...SITE.sideQuests.map((q) =>
+  h('li', { class: q.done ? 'done' : null },
+    h('span', { class: 'box', 'aria-hidden': 'true' }, q.done ? 'x' : ''),
+    h('span', null, q.text),
+    h('span', { class: 'sr' }, q.done ? ' (done)' : ' (not yet)'))));
+
+// Scroll progress bar
+const xp = $('xp');
+let ticking = false;
+function onScroll() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  xp.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + '%';
+  ticking = false;
+}
+addEventListener('scroll', () => { if (!ticking) { requestAnimationFrame(onScroll); ticking = true; } }, { passive: true });
+onScroll();
 
 // Highlight the current section in the nav
-const links = [...document.querySelectorAll('.hud nav a')];
+const links = [...document.querySelectorAll('.bar nav a')];
 const io = new IntersectionObserver((entries) => {
   for (const e of entries) {
-    if (!e.isIntersecting) continue;
-    links.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id));
+    if (e.isIntersecting) links.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id));
   }
 }, { rootMargin: '-40% 0px -55% 0px' });
 document.querySelectorAll('main section[id]').forEach((s) => io.observe(s));
+
+// Konami code switches to a handheld palette.
+const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let pos = 0;
+addEventListener('keydown', (e) => {
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  pos = k === code[pos] ? pos + 1 : (k === code[0] ? 1 : 0);
+  if (pos === code.length) {
+    pos = 0;
+    const on = document.documentElement.dataset.theme !== 'gb';
+    document.documentElement.dataset.theme = on ? 'gb' : '';
+  }
+});

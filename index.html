@@ -9,25 +9,26 @@
   <meta property="og:description" content="Backend and infrastructure software in Go and Python. Merged pull requests in Kerno and Tether.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://huynna12.github.io/">
-  <meta name="theme-color" content="#14141f">
+  <meta name="theme-color" content="#fbf7f0">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="canonical" href="https://huynna12.github.io/">
-  <link rel="preload" href="fonts/PressStart2P.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/JetBrainsMono.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
+  <div class="xp" aria-hidden="true"><span id="xp"></span></div>
 
-  <header class="hud">
-    <a class="hud-name" href="#top">HUH</a>
+  <header class="bar">
+    <a class="brand" href="#top">Huynh Ho</a>
     <nav aria-label="Sections">
       <ul>
         <li><a href="#open-source">Open source</a></li>
         <li><a href="#projects">Projects</a></li>
         <li><a href="#skills">Skills</a></li>
         <li><a href="#background">Background</a></li>
+        <li><a href="#side-quests">Side quests</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
@@ -35,47 +36,53 @@
 
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
-      <p class="label">Player 1</p>
-      <h1 id="hero-title"><span id="name"></span></h1>
-      <p class="aka">Goes by <strong id="pref"></strong></p>
-      <p class="lead" id="tagline"></p>
-      <p class="seeking" id="seeking"></p>
-      <div class="buttons" id="hero-buttons"></div>
+      <div class="hero-text">
+        <p class="kicker">Hi, I'm <span id="pref"></span></p>
+        <h1 id="hero-title"><span id="name"></span></h1>
+        <p class="lead" id="tagline"></p>
+        <p class="seeking" id="seeking"></p>
+        <div class="buttons" id="hero-buttons"></div>
+      </div>
+      <aside class="sheet" aria-label="Character sheet">
+        <p class="sheet-title">Character sheet</p>
+        <dl id="sheet"></dl>
+      </aside>
     </section>
 
     <section id="open-source" aria-labelledby="os-title">
-      <p class="label">Level 1</p>
+      <p class="num">01</p>
       <h2 id="os-title">Open source</h2>
       <p class="intro">Merged pull requests in real projects. Every PR number links to GitHub.</p>
-      <div id="os-list" class="stack"></div>
+      <div id="os-list"></div>
     </section>
 
     <section id="projects" aria-labelledby="proj-title">
-      <p class="label">Level 2</p>
+      <p class="num">02</p>
       <h2 id="proj-title">Projects</h2>
-      <div id="proj-list" class="grid"></div>
+      <div id="proj-list"></div>
     </section>
 
     <section id="skills" aria-labelledby="skills-title">
-      <p class="label">Level 3</p>
+      <p class="num">03</p>
       <h2 id="skills-title">Skills</h2>
-      <div id="skills-list" class="grid grid-2"></div>
+      <p class="intro">Inventory.</p>
+      <dl id="skills-list" class="inventory"></dl>
     </section>
 
     <section id="background" aria-labelledby="bg-title">
-      <p class="label">Level 4</p>
+      <p class="num">04</p>
       <h2 id="bg-title">Education and experience</h2>
-      <div id="bg-list" class="stack"></div>
+      <div id="bg-list"></div>
     </section>
 
-    <section id="side-quests" aria-labelledby="now-title">
-      <p class="label">Bonus level</p>
-      <h2 id="now-title">Side quests</h2>
-      <ul id="now-list" class="plain"></ul>
+    <section id="side-quests" aria-labelledby="sq-title">
+      <p class="num">05</p>
+      <h2 id="sq-title">Side quests</h2>
+      <ul id="sq-list" class="quests"></ul>
     </section>
 
     <section id="contact" aria-labelledby="contact-title">
-      <p class="label">Final level</p>
+      <p class="num">06</p>
       <h2 id="contact-title">Contact</h2>
       <p class="intro">Email is the fastest way to reach me.</p>
       <div class="buttons" id="contact-buttons"></div>
@@ -89,7 +96,7 @@
     </noscript>
   </main>
 
-  <footer><p>Built by hand with HTML, CSS and JavaScript.</p></footer>
+  <footer><p>Built by hand with HTML, CSS and JavaScript. Psst: try the Konami code.</p></footer>
 
   <script src="data/site.js"></script>
   <script src="script.js"></script>
