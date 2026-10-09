@@ -311,19 +311,19 @@ function makeHat() {
   return g;
 }
 
-/* ---------- Dép tổ ong: a honeycomb slide sandal ---------- */
+/* ---------- Dép tông: a flip-flop with a pale sole and blue thong straps in a V ---------- */
 function makeSlipper(skinMat) {
   const g = new THREE.Group();
-  const tan = new THREE.MeshStandardMaterial({ color: 0xe0c59c, roughness: 0.55, envMapIntensity: 0.6 });
-  const sole = new THREE.MeshStandardMaterial({ color: 0xc79f6b, roughness: 0.65 });
-  const holeM = new THREE.MeshBasicMaterial({ color: 0x80603c, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const solePale = new THREE.MeshStandardMaterial({ color: 0xf2e6e1, roughness: 0.5, envMapIntensity: 0.6 });
+  const blue = new THREE.MeshStandardMaterial({ color: 0x1f6fb0, roughness: 0.45, envMapIntensity: 0.8 });
+  const blueDark = new THREE.MeshStandardMaterial({ color: 0x15598f, roughness: 0.5 });
 
-  // sole: a foot-shaped slab, narrower at the heel
+  // sole: a thin foot-shaped slab, narrower at the heel
   const outline = new THREE.Shape();
-  outline.absellipse(0, 0, 1.95, 3.6, 0, Math.PI * 2, false);
-  const soleGeo = new THREE.ExtrudeGeometry(outline, { depth: 0.4, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 3, curveSegments: 32 });
+  outline.absellipse(0, 0, 1.95, 3.65, 0, Math.PI * 2, false);
+  const soleGeo = new THREE.ExtrudeGeometry(outline, { depth: 0.25, bevelEnabled: true, bevelThickness: 0.15, bevelSize: 0.16, bevelSegments: 3, curveSegments: 36 });
   soleGeo.rotateX(Math.PI / 2);                 // shape +y becomes +z (toe forward), extrusion goes down
-  soleGeo.translate(0, 0.6, 1.2);
+  soleGeo.translate(0, 0.4, 1.2);
   {
     const p = soleGeo.attributes.position;
     for (let i = 0; i < p.count; i++) {
@@ -332,45 +332,36 @@ function makeSlipper(skinMat) {
     }
     soleGeo.computeVertexNormals();
   }
-  g.add(new THREE.Mesh(soleGeo, sole));
+  g.add(new THREE.Mesh(soleGeo, solePale));
 
   // foot with toes
   const foot = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), skinMat);
-  foot.scale.set(1.4, 0.66, 3.1); foot.position.set(0, 1.25, 1.1);
+  foot.scale.set(1.4, 0.66, 3.1); foot.position.set(0, 1.2, 1.1);
   g.add(foot);
   for (let i = 0; i < 5; i++) {
     const x = -1.05 + i * 0.52;
     const toe = new THREE.Mesh(new THREE.SphereGeometry(i === 2 ? 0.52 : 0.4, 12, 10), skinMat);
     toe.scale.set(1, 0.8, 1.15);
-    toe.position.set(x, 1.0, 4.0 - Math.abs(x) * 0.45 - (i === 0 || i === 4 ? 0.1 : 0));
+    toe.position.set(x, 0.92, 4.0 - Math.abs(x) * 0.45 - (i === 0 || i === 4 ? 0.1 : 0));
     g.add(toe);
   }
 
-  // the strap over the instep: a thick arch with rows of round holes
-  const RX = 1.84, RY = 1.5, T = 0.3, Z0 = 0.75, ZL = 2.5, BASE = 0.78;
-  const arch = new THREE.Shape();
-  arch.moveTo(RX, 0);
-  arch.absellipse(0, 0, RX, RY, 0, Math.PI, false);
-  arch.lineTo(-(RX - T), 0);
-  arch.absellipse(0, 0, RX - T, RY - T, Math.PI, 0, true);
-  arch.lineTo(RX, 0);
-  const archGeo = new THREE.ExtrudeGeometry(arch, { depth: ZL, bevelEnabled: false, curveSegments: 28 });
-  archGeo.translate(0, BASE, Z0);
-  g.add(new THREE.Mesh(archGeo, tan));
-  const Zv = new THREE.Vector3(0, 0, 1), n = new THREE.Vector3();
-  const rows = [Z0 + 0.5, Z0 + 1.25, Z0 + 2.0];
-  rows.forEach((z, ri) => {
-    const cols = ri % 2 ? 6 : 7;
-    for (let k = 0; k < cols; k++) {
-      const th = Math.PI * (0.12 + (0.76 * (k + (ri % 2 ? 0.5 : 0))) / (ri % 2 ? cols : cols - 1));
-      const x = RX * Math.cos(th), y = BASE + RY * Math.sin(th);
-      n.set(Math.cos(th) / (RX * RX), Math.sin(th) / (RY * RY), 0).normalize();
-      const hole = new THREE.Mesh(new THREE.CircleGeometry(0.19, 12), holeM);
-      hole.position.set(x, y, z).addScaledVector(n, 0.012);
-      hole.quaternion.setFromUnitVectors(Zv, n);
-      g.add(hole);
-    }
-  });
+  // thong: a post between the toes, two straps running back over the foot to the sides of the sole
+  const footTop = (x, z) => 1.2 + 0.66 * Math.sqrt(Math.max(1 - (x / 1.4) ** 2 - ((z - 1.1) / 3.1) ** 2, 0));
+  for (const sx of [-1, 1]) {
+    const path = [[0, 3.55], [0.5, 2.9], [0.95, 1.95], [1.25, 1.05], [1.4, 0.3]].map(([x, z]) =>
+      new THREE.Vector3(sx * x, Math.max(footTop(x, z) + 0.3, 0.95), z));
+    path.push(new THREE.Vector3(sx * 1.78, 0.62, 0.12));
+    path.unshift(new THREE.Vector3(0, 0.62, 3.6));
+    const strap = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(path), 40, 0.34, 10, false), blue);
+    g.add(strap);
+    const stud = new THREE.Mesh(new THREE.SphereGeometry(0.36, 12, 10), blueDark);   // where the strap meets the sole
+    stud.position.set(sx * 1.78, 0.6, 0.12); stud.scale.set(1, 0.6, 1);
+    g.add(stud);
+  }
+  const post = new THREE.Mesh(new THREE.SphereGeometry(0.38, 14, 10), blueDark);
+  post.position.set(0, 0.8, 3.6); post.scale.set(1, 0.7, 1);
+  g.add(post);
   return g;
 }
 
@@ -555,9 +546,9 @@ export function startCoffee({ canvas, stage, onReady }) {
   backHair.scale.set(5.5, 5.4, 3.9); backHair.position.set(0, HC.y - 3.1, HC.z - 3.3);
   head.add(cap, backHair);
   for (const sx of [-1, 1]) {
-    const lobe = pin(sx * 2.9, HC.y + 2.0, 0.28);
+    const lobe = pin(sx * 2.9, HC.y + 2.45, 0.28);
     const m = new THREE.Mesh(new THREE.SphereGeometry(1, 30, 20), hairM);
-    m.scale.set(2.9, 1.5, 1.1); m.rotation.z = -sx * 0.42;
+    m.scale.set(2.9, 1.35, 1.1); m.rotation.z = -sx * 0.4;
     lobe.add(m);
     // a thin lock down the side of the face, in front of the ear
     const pts = [];
@@ -570,34 +561,25 @@ export function startCoffee({ canvas, stage, onReady }) {
     head.add(taperedStrand(pts, 0.34, hairM));
   }
 
-  /* Face */
+  /* Face: simple and sweet. Plain round black eyes, one thin brow each, a round nose, a small smile. */
+  const eyeBlack = new THREE.MeshStandardMaterial({ color: 0x120d0c, roughness: 0.3, envMapIntensity: 0.9 });
   const eyes = [];
   for (const sx of [-1, 1]) {
-    const eyeY = HC.y - 0.8;
-    const eye = pin(sx * 2.4, eyeY, 0.05);
-    const ball = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), dark);
-    ball.scale.set(1.0, 1.25, 0.42);
-    const hl = new THREE.Group();
-    const h1 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 10), white); h1.position.set(0.3, 0.46, 0.46);
-    const h2 = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), white); h2.position.set(-0.3, -0.42, 0.44);
-    hl.add(h1, h2);
+    const eye = pin(sx * 3.25, HC.y - 0.9, 0.05);
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), eyeBlack);
+    ball.scale.set(0.74, 0.82, 0.4);
+    const hl = new THREE.Group();                    // (kept so the gaze code has something to move)
     eye.add(ball, hl);
-    for (const [a, len] of [[0.9, 0.62], [0.35, 0.55]]) {            // two lashes at the outer corner
-      const lash = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, len, 3, 6), dark);
-      lash.position.set(sx * (0.95 + 0.25 * (0.9 - a)), 0.78 + 0.3 * a, 0.28);
-      lash.rotation.z = -sx * (0.6 + a * 0.9);
-      eye.add(lash);
-    }
     eyes.push({ eye, pupil: hl, base: hl.position.clone() });
 
-    const br = pin(sx * 2.5, HC.y + 1.55, 0.08);
-    const arc = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.1, 6, 20, 1.3), brow);
-    arc.rotation.z = Math.PI / 2 - 0.65 - sx * 0.12;
-    arc.position.y = -0.7;
+    const br = pin(sx * 3.3, HC.y + 0.45, 0.1);
+    const arc = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.075, 6, 20, 1.15), brow);
+    arc.rotation.z = Math.PI / 2 - 0.58 - sx * 0.1;
+    arc.position.y = -0.75;
     br.add(arc);
 
-    const bl = pin(sx * 3.75, HC.y - 2.3, 0.04);
-    bl.add(new THREE.Mesh(new THREE.CircleGeometry(1.15, 24), blush));
+    const bl = pin(sx * 4.15, HC.y - 2.5, 0.04);
+    bl.add(new THREE.Mesh(new THREE.CircleGeometry(1.35, 28), blush));
 
     // ear and pearl earring
     const ear = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), skin);
@@ -608,13 +590,13 @@ export function startCoffee({ canvas, stage, onReady }) {
     pr.position.set(sx * (HR * HS.x + 0.08), HC.y - 2.15, HC.z - 0.4);
     head.add(pr);
   }
-  const nose = pin(0, HC.y - 1.9, 0.12);
-  const noseM = new THREE.Mesh(new THREE.SphereGeometry(0.5, 14, 10), new THREE.MeshStandardMaterial({ color: 0xf0bd9d, roughness: 0.6 }));
-  noseM.scale.set(1, 0.82, 0.8);
+  const nose = pin(0, HC.y - 1.7, 0.12);
+  const noseM = new THREE.Mesh(new THREE.SphereGeometry(0.62, 16, 12), new THREE.MeshStandardMaterial({ color: 0xf2b99b, roughness: 0.55 }));
+  noseM.scale.set(1, 0.85, 0.85);
   nose.add(noseM);
-  const mouth = pin(0, HC.y - 3.15, 0.04);          // a tiny smile; hidden while she sips
-  const smile = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.075, 6, 18, 1.9), dark);
-  smile.rotation.z = -Math.PI / 2 - 0.95;
+  const mouth = pin(0, HC.y - 3.2, 0.04);          // a small smile; hidden while she sips
+  const smile = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.065, 6, 20, 1.45), new THREE.MeshStandardMaterial({ color: 0x9c3a2b, roughness: 0.6 }));
+  smile.rotation.z = -Math.PI / 2 - 0.725;
   mouth.add(smile);
 
   /* Nón lá, pushed back a little, with a red strap under the chin */
@@ -778,6 +760,7 @@ export function startCoffee({ canvas, stage, onReady }) {
 
   /* ---- camera ---- */
   const CENTER = new THREE.Vector3(-7.0, 14.6, 1.5);
+  const ELEV = Number(new URLSearchParams(location.search).get('elev') || 8);   // test option: /?elev=40 looks down on the scene
   let dist = 80, az = 0.38, azBase = 0.38, tilt = 0, tiltT = 0, drag = null, dragStart = 0;
   function resize() {
     const w = stage.clientWidth, h = stage.clientHeight;
@@ -789,7 +772,7 @@ export function startCoffee({ canvas, stage, onReady }) {
     if (reduced) render();
   }
   function render() {
-    camera.position.set(CENTER.x + Math.sin(az) * dist, CENTER.y + 8 + tilt * 8, CENTER.z + Math.cos(az) * dist);
+    camera.position.set(CENTER.x + Math.sin(az) * dist, CENTER.y + ELEV + tilt * 8, CENTER.z + Math.cos(az) * dist);
     camera.lookAt(CENTER);
     renderer.render(scene, camera);
   }
