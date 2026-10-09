@@ -22,11 +22,15 @@ const bullets = (list) =>
   list && list.length ? h('ul', { class: 'bullets' }, list.map((b) => h('li', null, b))) : null;
 
 function flow(d) {
-  const stepEl = (s) => s.parallel
-    ? h('div', { class: 'par' }, s.parallel.map((x) => h('span', { class: 'step' }, x)))
-    : h('span', { class: 'step' }, s);
+  // A step is a string, { parallel: [...] }, or { text, kind } where kind is 'new' (I added it) or 'bad' (the problem).
+  const stepEl = (s) => {
+    if (s.parallel) return h('div', { class: 'par' }, s.parallel.map((x) => h('span', { class: 'step' }, x)));
+    if (s.text) return h('span', { class: 'step ' + (s.kind || '') }, s.text);
+    return h('span', { class: 'step' }, s);
+  };
   return h('div', { class: 'flow' },
     h('p', { class: 'flow-title' }, d.title),
+    d.note ? h('p', { class: 'flow-note' }, d.note) : null,
     d.rows.map((r) => r.heading
       ? h('p', { class: 'flow-head' }, r.heading)
       : h('div', { class: 'flow-row' + (r.tone ? ' ' + r.tone : '') },
@@ -180,7 +184,7 @@ addEventListener('keydown', (e) => {
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=41').then((m) => {
+  import('./coffee.js?v=42').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }

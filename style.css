@@ -252,7 +252,11 @@ h3 .plain:hover { text-decoration: underline; }
 .flow-row:last-child { margin-bottom: 0; }
 .flow-head { font: 600 0.8rem/1.4 var(--mono); color: var(--fg); margin: 0.9rem 0 0.4rem; padding-top: 0.7rem; border-top: 1px dotted var(--rule); }
 .flow-title + .flow-head { margin-top: 0; padding-top: 0; border-top: 0; }
+.flow-note { font: 0.74rem/1.4 var(--mono); color: var(--muted); margin: -0.3rem 0 0.7rem; }
 .flow-row.before .step { border-style: dashed; border-color: var(--muted); color: var(--muted); }
+.flow-row .step.bad { border-style: dashed; border-color: var(--red); color: var(--red); background: transparent; }
+.flow-row .step.new { background: var(--accent-soft); border-color: var(--accent); color: var(--fg); font-weight: 500; position: relative; padding-right: 2.9rem; }
+.flow-row .step.new::after { content: "NEW"; position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%); font: 600 0.55rem/1 var(--mono); letter-spacing: 0.08em; background: var(--accent); color: var(--accent-ink); padding: 0.18rem 0.3rem; border-radius: 4px; }
 .flow-row.after .step { border-color: var(--accent); }
 .flow-row.before .flow-label { color: var(--red); }
 .flow-row.after .flow-label { color: var(--accent); }

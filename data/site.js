@@ -65,19 +65,20 @@ const SITE = {
           text: "Fixed silent data loss on unclean shutdown by flushing pending writes at exit, with 6 tests."
         }
       ],
-      // Only what the three merged PRs did. Add rows here as more PRs land.
+      // Only what the three merged PRs did. A step with kind "new" is something I added; "bad" is the problem it fixed.
       diagram: {
-        title: "Before and after my changes",
+        title: "What changed in the flow",
+        note: "The highlighted steps are what I added.",
         rows: [
           { heading: "#220 Tracing" },
-          { label: "Before", tone: "before", steps: ["Responses carry no request ID", "Can't follow one request across a fleet"] },
-          { label: "After", tone: "after", steps: ["Middleware stamps a UUID on every response", "One request can be traced across a fleet"] },
+          { label: "Before", tone: "before", steps: ["Request", "API", "Response", { text: "No way to follow one request across a fleet", kind: "bad" }] },
+          { label: "After", tone: "after", steps: ["Request", { text: "Middleware stamps a UUID request ID", kind: "new" }, "API", "Response carries the ID", "One request can be traced across a fleet"] },
           { heading: "#258 Metrics" },
-          { label: "Before", tone: "before", steps: ["Episode cache bytes metric never emitted in production", "Plus a double-counting bug"] },
-          { label: "After", tone: "after", steps: ["Metric wired up and emits in production", "Counted once"] },
+          { label: "Before", tone: "before", steps: ["Episode cache bytes", { text: "Metric never emitted in production", kind: "bad" }, { text: "Double-counting bug", kind: "bad" }] },
+          { label: "After", tone: "after", steps: ["Episode cache bytes", { text: "Wired to the Prometheus metric", kind: "new" }, { text: "Counted once", kind: "new" }, "Metric emits in production"] },
           { heading: "#304 Shutdown" },
-          { label: "Before", tone: "before", steps: ["Process exits uncleanly", "Pending writes lost, silently"] },
-          { label: "After", tone: "after", steps: ["Recorder queue flushed at exit", "No silent data loss"] }
+          { label: "Before", tone: "before", steps: ["Pending writes in the recorder queue", "Process exits", { text: "Writes lost, silently", kind: "bad" }] },
+          { label: "After", tone: "after", steps: ["Pending writes in the recorder queue", "Process exits", { text: "Flush the queue at exit", kind: "new" }, "Writes saved"] }
         ]
       }
     }
