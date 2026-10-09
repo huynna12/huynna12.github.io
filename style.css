@@ -388,16 +388,16 @@ body { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.
 .curtain .d2 { animation-delay: -0.6s; } .curtain .d3 { animation-delay: -1.1s; } .curtain .d4 { animation-delay: -1.7s; }
 .curtain .d5 { animation-delay: -0.3s; } .curtain .d6 { animation-delay: -2s; } .curtain .d7 { animation-delay: -1.4s; }
 @keyframes dotBob { from { transform: translateY(-1.5px); } to { transform: translateY(2px); } }
-.curtain .surf { transform-box: fill-box; transform-origin: center; animation: surfUp 0.9s ease-out 1.0s forwards; }
+.curtain .surf { transform-box: fill-box; transform-origin: center; animation: surfUp 0.7s ease-out 0.8s forwards; }
 @keyframes surfUp { to { transform: translateY(-13px) scale(1.06, 1.15); } }
 
 /* big 3D ice cubes: CSS cubes, so they tumble as they fall */
 .cube3d {
   position: absolute; width: calc(54 * var(--u)); height: calc(54 * var(--u)); transform-style: preserve-3d;
   left: calc((var(--cx) - 27) * var(--u)); top: calc((var(--cy) - 27) * var(--u));
-  opacity: 0; animation: cubeDrop 0.78s cubic-bezier(0.5, 0, 0.9, 0.55) var(--d) both;
+  opacity: 0; animation: cubeDrop 0.6s cubic-bezier(0.5, 0, 0.9, 0.55) var(--d) both;
 }
-.cube3d-spin { position: absolute; inset: 0; transform-style: preserve-3d; animation: cubeSpin 0.78s ease-out var(--d) both; }
+.cube3d-spin { position: absolute; inset: 0; transform-style: preserve-3d; animation: cubeSpin 0.6s ease-out var(--d) both; }
 .cube3d i {
   position: absolute; inset: 0; border-radius: 14%;
   background: linear-gradient(135deg, rgba(240, 249, 255, 0.7), rgba(184, 218, 244, 0.42) 55%, rgba(224, 240, 255, 0.62));
@@ -411,9 +411,9 @@ body { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.
 .cube3d .l { transform: rotateY(-90deg) translateZ(calc(27 * var(--u))); }
 .cube3d .t { transform: rotateX(90deg) translateZ(calc(27 * var(--u))); }
 .cube3d .b { transform: rotateX(-90deg) translateZ(calc(27 * var(--u))); }
-.cubes .c1 { --cx: 168; --cy: 236; --d: 0.4s; --rx: 24deg; --ry: -20deg; --rz: 12deg; }
-.cubes .c2 { --cx: 234; --cy: 240; --d: 0.95s; --rx: -18deg; --ry: 26deg; --rz: -10deg; }
-.cubes .c3 { --cx: 202; --cy: 196; --d: 1.5s; --rx: 14deg; --ry: -30deg; --rz: 6deg; }
+.cubes .c1 { --cx: 168; --cy: 236; --d: 0.3s; --rx: 24deg; --ry: -20deg; --rz: 12deg; }
+.cubes .c2 { --cx: 234; --cy: 240; --d: 0.75s; --rx: -18deg; --ry: 26deg; --rz: -10deg; }
+.cubes .c3 { --cx: 202; --cy: 196; --d: 1.15s; --rx: 14deg; --ry: -30deg; --rz: 6deg; }
 @keyframes cubeDrop {
   0%   { opacity: 1; transform: translateY(-120vh); }
   70%  { opacity: 1; transform: translateY(0); }
@@ -426,14 +426,14 @@ body { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.
 }
 
 /* the coffee rises to the brim, then pours over the front rim in two waves (after cubes 2 and 3) */
-.curtain .level { transform: translateY(14px); animation: levelUp 0.9s ease-out 1.0s forwards; }
+.curtain .level { transform: translateY(14px); animation: levelUp 0.7s ease-out 0.8s forwards; }
 @keyframes levelUp { to { transform: translateY(0); } }
 .curtain .reveal { height: 0; }
-.curtain .rA { animation: pourDown 1.3s cubic-bezier(0.3, 0.55, 0.35, 1) 1.55s forwards; }
-.curtain .rB { animation: pourDown 1.5s cubic-bezier(0.3, 0.55, 0.35, 1) 2.15s forwards; }
+.curtain .rA { animation: pourDown 1.0s cubic-bezier(0.3, 0.55, 0.35, 1) 1.2s forwards; }
+.curtain .rB { animation: pourDown 1.15s cubic-bezier(0.3, 0.55, 0.35, 1) 1.65s forwards; }
 @keyframes pourDown { to { height: 230px; } }
-.curtain .cs { opacity: 0; animation: coffeeSplash 0.9s cubic-bezier(0.2, 0.7, 0.4, 1) both; }
-.curtain .s1 { animation-delay: 1.0s; } .curtain .s2 { animation-delay: 1.55s; } .curtain .s3 { animation-delay: 2.15s; }
+.curtain .cs { opacity: 0; animation: coffeeSplash 0.7s cubic-bezier(0.2, 0.7, 0.4, 1) both; }
+.curtain .s1 { animation-delay: 0.8s; } .curtain .s2 { animation-delay: 1.2s; } .curtain .s3 { animation-delay: 1.65s; }
 @keyframes coffeeSplash {
   0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
   6%   { opacity: 1; transform: translate(calc(var(--dx) * 0.1), calc(var(--dy) * 0.1)) scale(0.5); }

@@ -200,7 +200,7 @@ addEventListener('keydown', (e) => {
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=54').then((m) => {
+  import('./coffee.js?v=55').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }
@@ -248,13 +248,13 @@ function stampPath(w, h, r, gap) {
   try { sessionStorage.setItem('intro-seen', '1'); } catch (e) {}
   let done = false;
   const end = () => { if (done) return; done = true; el.remove(); };
-  // The last cube lands at about 2.3s and the splash settles by 3s; the curtain slides up right after.
-  const liftTimer = setTimeout(() => { el.classList.add('lift'); }, 3000);
+  // The last cube lands at about 1.75s and the splash settles by 2.3s; the curtain slides up (0.7s), so the intro is about 3s in all.
+  const liftTimer = setTimeout(() => { el.classList.add('lift'); }, 2300);
   el.addEventListener('transitionend', (e) => { if (e.propertyName === 'transform') end(); });
   const skip = () => { if (done) return; clearTimeout(liftTimer); el.classList.add('skip'); setTimeout(end, 340); };
   el.addEventListener('click', skip);
   addEventListener('keydown', skip, { once: true });
   addEventListener('wheel', skip, { once: true, passive: true });
   addEventListener('touchmove', skip, { once: true, passive: true });
-  setTimeout(end, 5500);   // safety net
+  setTimeout(end, 4500);   // safety net
 })();
