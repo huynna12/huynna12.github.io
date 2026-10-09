@@ -184,18 +184,23 @@ addEventListener('keydown', (e) => {
   if (e.key === 'r' || e.key === 'R') beanShower();
 });
 
-// The same shower as pressing R also plays once when you arrive: after the intro, or on load when the intro is skipped.
-let entered = false;
-function enter() { if (entered) return; entered = true; setTimeout(beanShower, 300); }
-if (document.documentElement.classList.contains('no-intro')) {
-  if (document.readyState === 'complete') setTimeout(enter, 600); else addEventListener('load', () => setTimeout(enter, 600));
-}
+// The same shower as pressing R also plays the first time you reach the finish line at the bottom (once per visit).
+(function () {
+  const finish = document.querySelector('footer .km');
+  if (!finish || !window.IntersectionObserver) return;
+  const io = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    setTimeout(beanShower, 250);
+  }, { threshold: 1 });
+  io.observe(finish);
+})();
 
 // The 3D scene loads after the page is ready. The line drawing stays as the fallback.
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=53').then((m) => {
+  import('./coffee.js?v=54').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }
@@ -242,7 +247,7 @@ function stampPath(w, h, r, gap) {
   if (!el) return;
   try { sessionStorage.setItem('intro-seen', '1'); } catch (e) {}
   let done = false;
-  const end = () => { if (done) return; done = true; el.remove(); enter(); };
+  const end = () => { if (done) return; done = true; el.remove(); };
   // The last cube lands at about 2.3s and the splash settles by 3s; the curtain slides up right after.
   const liftTimer = setTimeout(() => { el.classList.add('lift'); }, 3000);
   el.addEventListener('transitionend', (e) => { if (e.propertyName === 'transform') end(); });
