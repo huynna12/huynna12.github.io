@@ -21,7 +21,7 @@
   <link rel="canonical" href="https://huynna12.github.io/">
   <script>try{if(!/[?&]intro\b/.test(location.search)&&sessionStorage.getItem('intro-seen'))document.documentElement.className+=' no-intro'}catch(e){}</script>
   <noscript><style>.curtain{display:none!important}</style></noscript>
-  <link rel="stylesheet" href="style.css?v=47">
+  <link rel="stylesheet" href="style.css?v=48">
 </head>
 <body>
   <div class="curtain" id="intro" role="presentation">
@@ -86,7 +86,6 @@
   </div>
 
   <a class="skip" href="#main">Skip to content</a>
-  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
 
   <header class="bar">
     <a class="brand" href="#top">Huynh Ho</a>
@@ -99,12 +98,27 @@
         <li><a href="#outside-work">Outside work</a></li>
       </ul>
     </nav>
+    <!-- Scroll progress: a line along the bottom of the bar, with a small runner at its leading edge. -->
+    <div class="track" aria-hidden="true">
+      <span id="progress"></span>
+      <svg class="runner" id="runner" viewBox="0 0 30 32">
+        <g class="flip"><g class="bob">
+          <g class="leg far" style="transform-origin:13px 17px"><path d="M13 17 L13 23"/><g class="shin" style="transform-origin:13px 23px"><path d="M13 23 L13 29 L16.5 29"/></g></g>
+          <g class="arm far" style="transform-origin:16.5px 9.5px"><path d="M16.5 9.5 L16.5 14"/><g class="fore" style="transform-origin:16.5px 14px"><path d="M16.5 14 L16.5 18"/></g></g>
+          <path class="torso" d="M16.5 9 L13 17"/>
+          <circle class="head" cx="19.5" cy="4.2" r="3.4"/>
+          <g class="leg near" style="transform-origin:13px 17px"><path d="M13 17 L13 23"/><g class="shin" style="transform-origin:13px 23px"><path d="M13 23 L13 29 L16.5 29"/></g></g>
+          <g class="arm near" style="transform-origin:16.5px 9.5px"><path d="M16.5 9.5 L16.5 14"/><g class="fore" style="transform-origin:16.5px 14px"><path d="M16.5 14 L16.5 18"/></g></g>
+        </g></g>
+      </svg>
+    </div>
   </header>
 
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="hero-text">
         <!-- The hero is plain HTML so it exists at first paint (no layout jump). Keep it in step with data/site.js. -->
+        <p class="km">Start line</p>
         <p class="hello">Hi, I'm <span id="pref">Heidi</span>.</p>
         <h1 id="hero-title"><span id="name">Huynh Ho</span><i class="dot">.</i></h1>
         <p class="lead" id="tagline">CS and Math double major, minor in Data Science.</p>
@@ -164,32 +178,32 @@
     </section>
 
     <section id="open-source" aria-labelledby="os-title">
-      <p class="km">km 5</p>
+      <p class="km">5 km in</p>
       <h2 id="os-title">Open source</h2>
       <p class="intro">Merged pull requests in real projects. Every PR number links to GitHub.</p>
       <div id="os-list"></div>
     </section>
 
     <section id="projects" aria-labelledby="proj-title">
-      <p class="km">km 10</p>
+      <p class="km">11 km in</p>
       <h2 id="proj-title">Projects</h2>
       <div id="proj-list"></div>
     </section>
 
     <section id="skills" aria-labelledby="skills-title">
-      <p class="km">km 15</p>
+      <p class="km">16 km in</p>
       <h2 id="skills-title">Skills</h2>
       <dl id="skills-list" class="menu"></dl>
     </section>
 
     <section id="background" aria-labelledby="bg-title">
-      <p class="km">km 21.1 <span>half marathon</span></p>
+      <p class="km">21.1 km in <span>half marathon</span></p>
       <h2 id="bg-title">Education and experience</h2>
       <div id="bg-list"></div>
     </section>
 
     <section id="outside-work" aria-labelledby="ow-title">
-      <p class="km">km 30</p>
+      <p class="km">30 km in</p>
       <h2 id="ow-title">Outside work</h2>
       <ul id="ow-list" class="quests"></ul>
       <p class="always"><span>Always on</span> <i id="always"></i></p>
@@ -205,7 +219,7 @@
 
   <footer><p>gg, you scrolled all the way down. The coffee refill is imaginary. <span>Psst: press R.</span></p></footer>
 
-  <script src="data/site.js?v=47" defer></script>
-  <script src="script.js?v=47" defer></script>
+  <script src="data/site.js?v=48" defer></script>
+  <script src="script.js?v=48" defer></script>
 </body>
 </html>

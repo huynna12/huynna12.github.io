@@ -127,15 +127,28 @@ $('ow-list').append(...SITE.outsideWork.map((q) =>
     h('span', { class: 'sr' }, q.done ? ' (done)' : ' (not yet)'))));
 $('always').textContent = SITE.alwaysOn;
 
-// Scroll progress line
-const bar = $('progress');
-let ticking = false;
+// Scroll progress line, with a runner at its leading edge. The runner only swings its legs while the page is moving,
+// and turns around when you scroll back up.
+const bar = $('progress'), runner = $('runner'), track = bar.parentElement;
+const RUNNER_W = 21;
+let ticking = false, trackW = track.clientWidth, lastY = scrollY, stopTimer = 0;
 function onScroll() {
   const max = document.documentElement.scrollHeight - innerHeight;
-  bar.style.transform = 'scaleX(' + (max > 0 ? scrollY / max : 0) + ')';
+  const p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+  bar.style.transform = 'scaleX(' + p + ')';
+  const x = Math.min(trackW - RUNNER_W, Math.max(0, p * trackW - RUNNER_W * 0.6));
+  runner.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0)';
   ticking = false;
 }
-addEventListener('scroll', () => { if (!ticking) { requestAnimationFrame(onScroll); ticking = true; } }, { passive: true });
+addEventListener('scroll', () => {
+  const dy = scrollY - lastY;
+  if (dy) { runner.classList.toggle('back', dy < 0); lastY = scrollY; }
+  runner.classList.add('running');
+  clearTimeout(stopTimer);
+  stopTimer = setTimeout(() => runner.classList.remove('running'), 160);
+  if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+}, { passive: true });
+new ResizeObserver(() => { trackW = track.clientWidth; onScroll(); }).observe(track);
 onScroll();
 
 // Highlight the current section in the nav
@@ -182,7 +195,7 @@ if (document.documentElement.classList.contains('no-intro')) {
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=47').then((m) => {
+  import('./coffee.js?v=48').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }

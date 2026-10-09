@@ -68,15 +68,36 @@ a { color: inherit; }
 a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* Scroll progress */
-.progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 40; }
-.progress span { display: block; height: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+/* Scroll progress: a line along the bottom edge of the top bar, with a small runner at its leading edge */
+.track { position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; pointer-events: none; }
+.track span { display: block; height: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+.runner { position: absolute; left: 0; bottom: 2px; width: 21px; height: 22px; color: var(--red); overflow: visible; will-change: transform; }
+.runner path { fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.runner .torso { stroke-width: 3.8; }
+.runner .head { fill: currentColor; }
+.runner .far { opacity: 0.55; }
+.runner .flip { transform-origin: 15px 16px; }
+.runner.back .flip { transform: scaleX(-1); }
+/* Legs and arms only swing while the page is scrolling; standing still otherwise. */
+.runner.running .leg { animation: thigh 0.46s ease-in-out infinite; }
+.runner.running .shin { animation: shin 0.46s ease-in-out infinite; }
+.runner.running .arm { animation: upper 0.46s ease-in-out infinite; }
+.runner.running .fore { animation: fore 0.46s ease-in-out infinite; }
+.runner.running .far { animation-delay: -0.23s; }
+.runner.running .far .shin, .runner.running .far .fore { animation-delay: -0.23s; }
+.runner.running .bob { animation: bob 0.23s ease-in-out infinite alternate; }
+@keyframes thigh { 0%, 100% { transform: rotate(-48deg); } 50% { transform: rotate(32deg); } }
+@keyframes shin { 0%, 100% { transform: rotate(25deg); } 50% { transform: rotate(95deg); } }
+@keyframes upper { 0%, 100% { transform: rotate(40deg); } 50% { transform: rotate(-45deg); } }
+@keyframes fore { 0%, 100% { transform: rotate(-70deg); } 50% { transform: rotate(-100deg); } }
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-1px); } }
+@media (prefers-reduced-motion: reduce) { .runner .leg, .runner .shin, .runner .arm, .runner .fore, .runner .bob { animation: none !important; } }
 
 /* Top bar */
 .bar {
   position: sticky; top: 0; z-index: 30;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding: 0.85rem 1.25rem;
+  padding: 0.7rem 1.25rem 1.55rem;   /* extra room under the links is the lane the runner uses */
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--rule);
