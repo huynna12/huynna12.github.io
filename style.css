@@ -298,8 +298,8 @@ h3 .plain:hover { text-decoration: underline; }
 .menu > div { display: flex; align-items: baseline; gap: 0.7rem; padding: 0.85rem 0; border-top: 1px solid var(--rule); }
 .menu dt { font-weight: 600; letter-spacing: -0.01em; flex: none; }
 .menu .dots { flex: 1; min-width: 1.5rem; border-bottom: 2px dotted var(--rule); transform: translateY(-0.3em); }
-.menu dd { margin: 0; text-align: right; color: var(--muted); max-width: 30rem; }
-@media (max-width: 40rem) {
+.menu dd { margin: 0; text-align: right; color: var(--muted); }
+@media (max-width: 52rem) {   /* below this the longest row no longer fits on one line, so stack the name above its list */
   .menu > div { flex-wrap: wrap; gap: 0.1rem 0.7rem; }
   .menu dd { flex-basis: 100%; text-align: left; }
 }
