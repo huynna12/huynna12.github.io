@@ -10,7 +10,7 @@ const SITE = {
     { k: "From", v: "Ho Chi Minh City, Vietnam" },
     { k: "Based in", v: "Gettysburg, PA" },
     { k: "Works in", v: "Go, Python" },
-    { k: "Looking for", v: "New grad 2027 roles" },
+    { k: "Target roles", v: "Backend, Infrastructure, SWE" },
     { k: "Fuel", v: "Vietnamese iced coffee" }
   ],
 
