@@ -179,7 +179,7 @@ addEventListener('keydown', (e) => {
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=39').then((m) => {
+  import('./coffee.js?v=40').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }

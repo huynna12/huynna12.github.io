@@ -64,7 +64,16 @@ const SITE = {
           title: "fix(runtime): flush recorder queue when the process exits",
           text: "Fixed silent data loss on unclean shutdown by flushing pending writes at exit, with 6 tests."
         }
-      ]
+      ],
+      // Only what the three merged PRs did. Add rows here as more PRs land.
+      diagram: {
+        title: "How my changes work",
+        rows: [
+          { label: "#220 Tracing", steps: ["API request", "Middleware adds a UUID request ID", "Response carries the ID", "Trace one request across a fleet"] },
+          { label: "#258 Metrics", steps: ["Episode cache bytes metric", "Wired up so it emits in production", "Double-counting fixed"] },
+          { label: "#304 Shutdown", steps: ["Process exits", "Flush pending writes from the recorder queue", "No silent data loss"] }
+        ]
+      }
     }
   ],
 
@@ -124,12 +133,6 @@ const SITE = {
     {
       name: "Line-Following Robot (PicarX)",
       purpose: "A small robot that follows a line using grayscale sensors. 2025.",
-      diagram: {
-        title: "How it works",
-        rows: [
-          { steps: ["Read grayscale sensors", "Follow the line", "Line lost: recovery logic", "Find the line again"] }
-        ]
-      },
       tags: ["Python", "Grayscale sensors", "State machine"],
       bullets: [
         "Led a student team.",
