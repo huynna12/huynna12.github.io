@@ -184,9 +184,9 @@ const SITE = {
   outsideWork: [
     { text: "Run a half marathon", done: true },
     { text: "Run a full marathon this year" },
-    { text: "Learn sign language" },
+    { text: "Master sign language" },
     { text: "Travel" },
     { text: "Save the world" }
   ],
-  alwaysOn: "Vietnamese iced coffee. Long runs. League of Legends."
+  alwaysOn: "Vietnamese iced coffee. Long runs. Games."
 };

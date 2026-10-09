@@ -761,7 +761,11 @@ export function startCoffee({ canvas, stage, onReady }) {
   /* ---- camera ---- */
   const CENTER = new THREE.Vector3(-7.0, 14.6, 1.5);
   const ELEV = Number(new URLSearchParams(location.search).get('elev') || 8);   // test option: /?elev=40 looks down on the scene
-  let dist = 80, az = 0.38, azBase = 0.38, tilt = 0, tiltT = 0, drag = null, dragStart = 0;
+  // The view starts swung to the left, then eases to the right over HALF seconds and back again, so it never shows the back of the scene.
+  const START_AZ = -1.1, SWEEP = 1.4, HALF = 30;
+  let dist = 80, az = START_AZ, azBase = START_AZ, sweepT = 0, tilt = 0, tiltT = 0, drag = null, dragStart = 0;
+  const curtain = document.getElementById('intro');   // hold the sweep until the intro curtain is lifting, so the first view is the start angle
+  const covered = () => curtain && curtain.isConnected && !document.documentElement.classList.contains('no-intro') && !curtain.classList.contains('lift') && !curtain.classList.contains('skip');
   function resize() {
     const w = stage.clientWidth, h = stage.clientHeight;
     if (!w || !h) return;
@@ -780,7 +784,7 @@ export function startCoffee({ canvas, stage, onReady }) {
   resize();
 
   canvas.style.touchAction = 'pan-y';
-  canvas.addEventListener('pointerdown', (e) => { drag = e.clientX; dragStart = azBase; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener('pointerdown', (e) => { drag = e.clientX; azBase = M.clamp(az, -1.1, 1.1); dragStart = azBase; sweepT = 0; canvas.setPointerCapture(e.pointerId); });
   canvas.addEventListener('pointermove', (e) => {
     if (drag === null) return;
     azBase = M.clamp(dragStart - (e.clientX - drag) * 0.01, -1.1, 1.1);
@@ -808,8 +812,9 @@ export function startCoffee({ canvas, stage, onReady }) {
       last = now;
       if (!visible) return;
       step(dt);
-      const drift = drag === null ? Math.sin(time * 0.2) * 0.22 : 0;
-      az += (azBase + drift - az) * 0.06;
+      if (drag !== null) sweepT = 0; else if (!covered()) sweepT += dt;
+      const sweep = SWEEP * (1 - Math.cos(Math.PI * sweepT / HALF)) / 2;
+      az += (M.clamp(azBase + sweep, -1.1, 1.1) - az) * 0.06;
       tilt += (tiltT - tilt) * 0.05;
       render();
       if (first) { first = false; onReady && onReady(); }

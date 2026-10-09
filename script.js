@@ -180,11 +180,18 @@ addEventListener('keydown', (e) => {
   if (e.key === 'r' || e.key === 'R') beanShower();
 });
 
+// The same shower as pressing R also plays once when you arrive: after the intro, or on load when the intro is skipped.
+let entered = false;
+function enter() { if (entered) return; entered = true; setTimeout(beanShower, 300); }
+if (document.documentElement.classList.contains('no-intro')) {
+  if (document.readyState === 'complete') setTimeout(enter, 600); else addEventListener('load', () => setTimeout(enter, 600));
+}
+
 // The 3D scene loads after the page is ready. The line drawing stays as the fallback.
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=45').then((m) => {
+  import('./coffee.js?v=46').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }
@@ -231,7 +238,7 @@ function stampPath(w, h, r, gap) {
   if (!el) return;
   try { sessionStorage.setItem('intro-seen', '1'); } catch (e) {}
   let done = false;
-  const end = () => { if (done) return; done = true; el.remove(); };
+  const end = () => { if (done) return; done = true; el.remove(); enter(); };
   // The three cubes land by about 2.3s and the spill settles by 3s; then the curtain slides up and is removed.
   const liftTimer = setTimeout(() => { el.classList.add('lift'); }, 4300);
   el.addEventListener('transitionend', (e) => { if (e.propertyName === 'transform') end(); });
