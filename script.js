@@ -47,14 +47,6 @@ function shot(s) {
     h('span', { class: 'cap' }, s.caption));
 }
 
-function contactButtons(target) {
-  const L = SITE.links;
-  target.append(
-    ext('GitHub', L.github),
-    ext('LinkedIn', L.linkedin),
-    h('a', { class: 'btn', href: 'mailto:' + L.email }, 'Email'));
-}
-
 // The resume button is in the HTML; turn it on once the file is confirmed to exist.
 (function () {
   const r = $('resume-btn');
@@ -70,7 +62,6 @@ function contactButtons(target) {
 
 // Hero
 $('glance').append(...SITE.sheet.map((r) => h('div', null, h('dt', null, r.k), h('dd', null, r.v))));
-contactButtons($('contact-buttons'));
 
 // Open source
 const prRow = (p, fallbackTitle) => h('li', { class: 'pr' },
@@ -191,7 +182,7 @@ if (document.documentElement.classList.contains('no-intro')) {
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=46').then((m) => {
+  import('./coffee.js?v=47').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }
