@@ -322,6 +322,7 @@ h3 .plain:hover { text-decoration: underline; }
 
 footer { max-width: var(--max); margin: 5rem auto 0; padding: 1.5rem 1.25rem 3rem; border-top: 1px solid var(--rule); color: var(--muted); font: 0.78rem/1.5 var(--mono); }
 footer span { font-style: italic; }
+footer .km span { font-style: normal; }
 .noscript { padding: 2rem 0; }
 
 /* Press R: coffee bean shower */
