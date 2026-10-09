@@ -27,10 +27,11 @@ function flow(d) {
     : h('span', { class: 'step' }, s);
   return h('div', { class: 'flow' },
     h('p', { class: 'flow-title' }, d.title),
-    d.rows.map((r) =>
-      h('div', { class: 'flow-row' },
-        r.label ? h('span', { class: 'flow-label' }, r.label) : null,
-        h('ol', null, r.steps.map((s) => h('li', null, stepEl(s)))))));
+    d.rows.map((r) => r.heading
+      ? h('p', { class: 'flow-head' }, r.heading)
+      : h('div', { class: 'flow-row' + (r.tone ? ' ' + r.tone : '') },
+          r.label ? h('span', { class: 'flow-label' }, r.label) : null,
+          h('ol', null, r.steps.map((x) => h('li', null, stepEl(x)))))));
 }
 
 function shot(s) {
@@ -179,7 +180,7 @@ addEventListener('keydown', (e) => {
 const fig = $('phin-fig');
 function loadCoffee() {
   if (navigator.connection && navigator.connection.saveData) return;
-  import('./coffee.js?v=40').then((m) => {
+  import('./coffee.js?v=41').then((m) => {
     m.startCoffee({ canvas: $('coffee'), stage: $('coffee-stage'), onReady: () => fig.classList.add('has3d') });
   }).catch((e) => { fig.dataset.err = String((e && e.message) || e).slice(0, 160); });
 }

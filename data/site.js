@@ -33,8 +33,8 @@ const SITE = {
       diagram: {
         title: "How the fix works",
         rows: [
-          { label: "Before", steps: ["Poll kubelet over HTTP", "Pod tracking silently stops on GKE and EKS"] },
-          { label: "After", steps: ["SharedIndexInformer (local node only)", "Two in-memory indexes", "O(1) pod lookups"] },
+          { label: "Before", tone: "before", steps: ["Poll kubelet over HTTP", "Pod tracking silently stops on GKE and EKS"] },
+          { label: "After", tone: "after", steps: ["SharedIndexInformer (local node only)", "Two in-memory indexes", "O(1) pod lookups"] },
           { label: "On failure", steps: ["API server error", "Exponential backoff, 1s to 2 min", "Keep stale entries, degraded mode"] }
         ]
       },
@@ -67,11 +67,17 @@ const SITE = {
       ],
       // Only what the three merged PRs did. Add rows here as more PRs land.
       diagram: {
-        title: "How my changes work",
+        title: "Before and after my changes",
         rows: [
-          { label: "#220 Tracing", steps: ["API request", "Middleware adds a UUID request ID", "Response carries the ID", "Trace one request across a fleet"] },
-          { label: "#258 Metrics", steps: ["Episode cache bytes metric", "Wired up so it emits in production", "Double-counting fixed"] },
-          { label: "#304 Shutdown", steps: ["Process exits", "Flush pending writes from the recorder queue", "No silent data loss"] }
+          { heading: "#220 Tracing" },
+          { label: "Before", tone: "before", steps: ["Responses carry no request ID", "Can't follow one request across a fleet"] },
+          { label: "After", tone: "after", steps: ["Middleware stamps a UUID on every response", "One request can be traced across a fleet"] },
+          { heading: "#258 Metrics" },
+          { label: "Before", tone: "before", steps: ["Episode cache bytes metric never emitted in production", "Plus a double-counting bug"] },
+          { label: "After", tone: "after", steps: ["Metric wired up and emits in production", "Counted once"] },
+          { heading: "#304 Shutdown" },
+          { label: "Before", tone: "before", steps: ["Process exits uncleanly", "Pending writes lost, silently"] },
+          { label: "After", tone: "after", steps: ["Recorder queue flushed at exit", "No silent data loss"] }
         ]
       }
     }

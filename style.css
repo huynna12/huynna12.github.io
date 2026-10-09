@@ -250,6 +250,12 @@ h3 .plain:hover { text-decoration: underline; }
 .flow-title { font: 500 0.68rem/1.5 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.7rem; }
 .flow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.8rem; margin-bottom: 0.55rem; }
 .flow-row:last-child { margin-bottom: 0; }
+.flow-head { font: 600 0.8rem/1.4 var(--mono); color: var(--fg); margin: 0.9rem 0 0.4rem; padding-top: 0.7rem; border-top: 1px dotted var(--rule); }
+.flow-title + .flow-head { margin-top: 0; padding-top: 0; border-top: 0; }
+.flow-row.before .step { border-style: dashed; border-color: var(--muted); color: var(--muted); }
+.flow-row.after .step { border-color: var(--accent); }
+.flow-row.before .flow-label { color: var(--red); }
+.flow-row.after .flow-label { color: var(--accent); }
 .flow-label { font: 0.72rem/1.5 var(--mono); color: var(--muted); flex-basis: 100%; margin-bottom: -0.2rem; }
 .flow ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0; margin: 0; padding: 0; }
 .flow li { display: flex; align-items: center; }
