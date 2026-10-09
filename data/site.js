@@ -16,7 +16,7 @@ const SITE = {
 
   links: {
     github: "https://github.com/huynna12",
-    linkedin: "https://linkedin.com/in/heidi-ho-16b875246",
+    linkedin: "https://www.linkedin.com/in/huynh-ho-16b875246/",
     email: "honhuhuynh1210@gmail.com",
     resume: "Huynh_Ho_Resume.pdf"
   },
