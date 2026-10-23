@@ -52,35 +52,44 @@ const SITE = {
         {
           number: 220, url: "https://github.com/FastCrest/tether/pull/220", merged: "Jun 17, 2026",
           title: "feat(api): add X-Reflex-Request-ID header middleware",
-          text: "Built request-ID middleware that stamps every API response with a UUID, so one request can be traced across a fleet. Merged after code review, with 5 unit tests."
+          text: "Built request-ID middleware that stamps every API response with a UUID, so one request can be traced across a fleet. Merged after code review, with 5 unit tests.",
+          diagram: {
+            title: "What this PR changed in the flow",
+            note: "Highlighted steps are what I added.",
+            rows: [
+              { label: "Before", tone: "before", steps: ["Request", "API", "Response", { text: "No way to follow one request across a fleet", kind: "bad" }] },
+              { label: "After", tone: "after", steps: ["Request", { text: "Middleware stamps a UUID request ID", kind: "new" }, "API", "Response carries the ID", "One request can be traced across a fleet"] }
+            ]
+          }
         },
         {
           number: 258, url: "https://github.com/FastCrest/tether/pull/258", merged: "Aug 28, 2026",
           title: "Fix/episode cache bytes metric wiring",
-          text: "Restored a Prometheus metric that never emitted in production and fixed a double-counting bug."
+          text: "Restored a Prometheus metric that never emitted in production and fixed a double-counting bug.",
+          diagram: {
+            title: "What this PR changed in the flow",
+            note: "Highlighted steps are what I added.",
+            rows: [
+              { label: "Before", tone: "before", steps: ["Episode cache bytes", { text: "Metric never emitted in production", kind: "bad" }, { text: "Double-counting bug", kind: "bad" }] },
+              { label: "After", tone: "after", steps: ["Episode cache bytes", { text: "Wired to the Prometheus metric", kind: "new" }, { text: "Counted once", kind: "new" }, "Metric emits in production"] }
+            ]
+          }
         },
         {
           number: 304, url: "https://github.com/FastCrest/tether/pull/304", merged: "Aug 28, 2026",
           title: "fix(runtime): flush recorder queue when the process exits",
-          text: "Fixed silent data loss on unclean shutdown by flushing pending writes at exit, with 6 tests."
+          text: "Fixed silent data loss on unclean shutdown by flushing pending writes at exit, with 6 tests.",
+          diagram: {
+            title: "What this PR changed in the flow",
+            note: "Highlighted steps are what I added.",
+            rows: [
+              { label: "Before", tone: "before", steps: ["Pending writes in the recorder queue", "Process exits", { text: "Writes lost, silently", kind: "bad" }] },
+              { label: "After", tone: "after", steps: ["Pending writes in the recorder queue", "Process exits", { text: "Flush the queue at exit", kind: "new" }, "Writes saved"] }
+            ]
+          }
         }
-      ],
-      // Only what the three merged PRs did. A step with kind "new" is something I added; "bad" is the problem it fixed.
-      diagram: {
-        title: "What changed in the flow",
-        note: "The highlighted steps are what I added.",
-        rows: [
-          { heading: "#220 Tracing" },
-          { label: "Before", tone: "before", steps: ["Request", "API", "Response", { text: "No way to follow one request across a fleet", kind: "bad" }] },
-          { label: "After", tone: "after", steps: ["Request", { text: "Middleware stamps a UUID request ID", kind: "new" }, "API", "Response carries the ID", "One request can be traced across a fleet"] },
-          { heading: "#258 Metrics" },
-          { label: "Before", tone: "before", steps: ["Episode cache bytes", { text: "Metric never emitted in production", kind: "bad" }, { text: "Double-counting bug", kind: "bad" }] },
-          { label: "After", tone: "after", steps: ["Episode cache bytes", { text: "Wired to the Prometheus metric", kind: "new" }, { text: "Counted once", kind: "new" }, "Metric emits in production"] },
-          { heading: "#304 Shutdown" },
-          { label: "Before", tone: "before", steps: ["Pending writes in the recorder queue", "Process exits", { text: "Writes lost, silently", kind: "bad" }] },
-          { label: "After", tone: "after", steps: ["Pending writes in the recorder queue", "Process exits", { text: "Flush the queue at exit", kind: "new" }, "Writes saved"] }
-        ]
-      }
+      ]
+      // Each PR carries its own diagram, shown right under it. A step with kind "new" is something I added; "bad" is the problem it fixed.
     }
   ],
 

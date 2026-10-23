@@ -70,7 +70,8 @@ const prRow = (p, fallbackTitle) => h('li', { class: 'pr' },
     h('span', { class: 'merged' }, 'Merged'),
     p.merged ? h('span', { class: 'date' }, p.merged) : null),
   p.title || fallbackTitle ? h('p', { class: 'mono' }, p.title || fallbackTitle) : null,
-  p.text ? h('p', null, p.text) : null);
+  p.text ? h('p', null, p.text) : null,
+  p.diagram ? flow(p.diagram) : null);
 
 $('os-list').append(...SITE.openSource.map((o) =>
   h('article', { class: 'repo' },
