@@ -16,7 +16,7 @@ const SITE = {
 
   links: {
     github: "https://github.com/huynna12",
-    linkedin: "https://www.linkedin.com/in/huynh-ho-16b875246/",
+    linkedin: "https://www.linkedin.com/in/heidi-ho-16b875246/",
     email: "honhuhuynh1210@gmail.com",
     resume: "Huynh_Ho_Resume.pdf"
   },
@@ -153,9 +153,10 @@ const SITE = {
   ],
 
   skills: [
-    { group: "Languages", items: ["Go", "Python", "Java", "JavaScript/TypeScript"] },
+    { group: "Languages", items: ["Python", "Go", "Java", "TypeScript", "SQL"] },
     { group: "Infrastructure", items: ["Kubernetes", "Docker", "AWS (EC2, Lightsail)", "Linux", "nginx", "Git"] },
     { group: "Backend and Observability", items: ["REST API design", "FastAPI", "Prometheus metrics", "MySQL"] },
+    { group: "Frontend", items: ["React", "Next.js"] },
     { group: "AI", items: ["Claude API", "RAG", "Multi-agent pipelines", "Claude Code"] }
   ],
 
@@ -168,10 +169,16 @@ const SITE = {
 
   experience: [
     {
-      role: "Open Source Contributor",
-      where: "Kerno and Tether",
-      when: "Apr 2026 to present",
-      text: "Merged pull requests in Go and Kubernetes tooling. Details above."
+      role: "Open Source Contributor, Backend Infrastructure",
+      where: "Kerno (GirlScript Summer of Code)",
+      when: "May to Aug 2026",
+      text: "Kubernetes observability tool in Go. 1 merged PR. Details above."
+    },
+    {
+      role: "Open Source Contributor, Backend and Observability",
+      where: "Tether (FastCrest)",
+      when: "Jun 2026 to present",
+      text: "Edge-to-cloud AI deployment CLI with 83+ stars. 3 merged PRs. Details above."
     },
     {
       role: "Teaching Assistant, Calculus I",
