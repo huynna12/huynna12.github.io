@@ -9,7 +9,7 @@ const SITE = {
   sheet: [
     { k: "From", v: "Ho Chi Minh City, Vietnam" },
     { k: "Based in", v: "Gettysburg, PA" },
-    { k: "Works in", v: "Go, Python" },
+    { k: "Works in", v: "Java, Python" },
     { k: "Target roles", v: "Backend, Infrastructure, SWE" },
     { k: "Fuel", v: "Vietnamese iced coffee" }
   ],
