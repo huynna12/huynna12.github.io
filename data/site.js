@@ -86,13 +86,13 @@ const SITE = {
 
   projects: [
     {
-      name: "model-operator",
+      name: "SipBoard",
       status: "In progress",
-      purpose: "A Go Kubernetes controller that deploys and manages model-serving workloads from a ModelDeployment custom resource.",
-      tags: ["Go", "Kubernetes"],
+      purpose: "Finds cafés that fit what you need right now (study, work, chill), shows what your friends think, and keeps a memory board of the places you've been.",
+      tags: ["Java", "Spring Boot", "PostgreSQL + PostGIS", "Redis", "Flyway", "Docker"],
       // TODO: add bullets, tests and results here only once they are finished and tested.
       bullets: [],
-      // TODO: the repo returned 404 when I checked. Add the link once it is public.
+      // TODO: add the GitHub link once the repo URL is confirmed.
       links: []
     },
     {
